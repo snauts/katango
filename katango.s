@@ -106,6 +106,9 @@ rst:
 	jsr	setup_pallete
 	jsr	wait_vblank
 
+	lda	#%0000000
+	sta	PPUSCROLL
+	sta	PPUSCROLL
 	lda	#%10001000
 	sta	PPUCTRL
 
