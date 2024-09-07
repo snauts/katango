@@ -1,3 +1,5 @@
 *.o
 *.nes
 code.s
+pcx-dump
+katango.chr
