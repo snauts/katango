@@ -11,7 +11,8 @@
 .word irq
 
 .segment "TILES"
-;; .incbin "katango.chr"
+.incbin "tiles.chr"
+.incbin "sprites.chr"
 
 .segment "ZEROPAGE"
 
@@ -109,6 +110,7 @@ rst:
 	sta	PPUCTRL
 
 	jsr	_game_startup
+:	jmp	:-
 
 wait_vblank:
 	bit	PPUSTATUS

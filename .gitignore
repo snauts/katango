@@ -1,5 +1,5 @@
 *.o
 *.nes
+*.chr
 code.s
 pcx-dump
-katango.chr

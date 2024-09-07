@@ -49,6 +49,32 @@ static unsigned char *read_pcx(const char *file) {
     return pixels;
 }
 
+static void save_tile_line(unsigned char *buf, int plane) {
+    unsigned char byte = 0;
+    for (int i = 0; i < 8; i++) {
+	if (buf[i] & plane) {
+	    byte |= (0x80 >> i);
+	}
+    }
+    printf("%c", byte);
+}
+
+static void save_tile_plane(unsigned char *buf, int plane) {
+    for (int y = 0; y < 8; y++) {
+	save_tile_line(buf + y * header.w, plane);
+    }
+}
+
+static void save_tiles(unsigned char *buf) {
+    for (int y = 0; y < header.h; y += 8) {
+	for (int x = 0; x < header.w; x += 8) {
+	    unsigned char *ptr = buf + y * header.w + x;
+	    save_tile_plane(ptr, 1);
+	    save_tile_plane(ptr, 2);
+	}
+    }
+}
+
 int main(int argc, char **argv) {
     if (argc < 3) {
 	printf("USAGE: pcx-dump [option] file.pcx\n");
@@ -61,7 +87,13 @@ int main(int argc, char **argv) {
 
     unsigned char *buf = read_pcx(file_name);
     if (buf == NULL) return -ENOENT;
-    free(buf);
 
+    switch (argv[1][1]) {
+    case 't':
+	save_tiles(buf);
+	break;
+    }
+
+    free(buf);
     return 0;
 }
