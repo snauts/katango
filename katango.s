@@ -106,7 +106,7 @@ rst:
 	jsr	setup_pallete
 	jsr	wait_vblank
 
-	lda	#%10000000
+	lda	#%10001000
 	sta	PPUCTRL
 
 	jsr	_game_startup
