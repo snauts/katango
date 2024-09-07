@@ -32,11 +32,14 @@ oam_buffer:	.res 256
 PPUCTRL		= $2000
 PPUMASK		= $2001
 PPUSTATUS	= $2002
+OAMADDR		= $2003
+OAMDATA		= $2004
 
+DMC_FREQ	= $4010
+OAMDMA		= $4014
 SND_CHN		= $4015
 JOY1		= $4016
 JOY2		= $4017
-DMC_FREQ	= $4010
 
 nmi:
 	pha
@@ -46,6 +49,16 @@ nmi:
 	pha
 
 	jsr	_irq_handler
+
+	ldx	#%00000000
+	stx	PPUMASK
+
+	stx	OAMADDR
+	lda	#>oam_buffer
+	sta	OAMDMA
+
+	lda	#%00011110
+	sta	PPUMASK
 
 	pla
 	tay
