@@ -21,6 +21,16 @@
 oam_buffer:	.res 256
 
 .segment "RODATA"
+palette:
+.byte $0F, $03, $13, $23
+.byte $0F, $0F, $0F, $0F
+.byte $0F, $08, $18, $28
+.byte $0F, $09, $19, $29
+
+.byte $0F, $06, $16, $30
+.byte $0F, $27, $28, $10
+.byte $0F, $06, $16, $37
+.byte $0F, $06, $16, $17
 
 .segment "SAMPLE"
 
@@ -34,6 +44,9 @@ PPUMASK		= $2001
 PPUSTATUS	= $2002
 OAMADDR		= $2003
 OAMDATA		= $2004
+PPUSCROLL	= $2005
+PPUADDR		= $2006
+PPUDATA		= $2007
 
 DMC_FREQ	= $4010
 OAMDMA		= $4014
@@ -89,6 +102,8 @@ rst:
 	jsr	wait_vblank
 	jsr	clear_memory
 	jsr	wait_vblank
+	jsr	setup_pallete
+	jsr	wait_vblank
 
 	lda	#%10000000
 	sta	PPUCTRL
@@ -127,4 +142,20 @@ hide_all_sprites:
 	inx
 	inx
 	bne	:-
+	rts
+
+setup_pallete:
+	lda	#$3F
+	sta	PPUADDR
+	lda	#$00
+	sta	PPUADDR
+
+	ldx	#0
+:
+	lda	palette, x
+	sta	PPUDATA
+	inx
+	cpx	#32
+	bcc	:-
+
 	rts
