@@ -89,6 +89,10 @@ rst:
 	jsr	wait_vblank
 	jsr	clear_memory
 	jsr	wait_vblank
+
+	lda	#%10000000
+	sta	PPUCTRL
+
 	jsr	_game_startup
 
 wait_vblank:
