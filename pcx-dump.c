@@ -1,3 +1,4 @@
+#include <sys/param.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -159,13 +160,33 @@ static int look_up_tile(unsigned char *buf) {
     return (tileset_size / 16) - 1;
 }
 
-static void process_tiles(unsigned char *buf) {
+static int get_equal(unsigned char *buf, int max) {
+    for (int i = 1; i < max; i++) {
+	if (buf[0] != buf[i]) {
+	    return i;
+	}
+    }
+    return max;
+}
+
+static int get_diffs(unsigned char *buf, int max) {
+    for (int i = 0; i < max; i++) {
+	if (get_equal(buf + i, MIN(max, 3)) > 2) {
+	    return i;
+	}
+    }
+    return max;
+}
+
+static void print_hex(FILE *fp, unsigned char x, int *size) {
+    fprintf(fp, " 0x%02x,", x);
+    if (((*size)++ & 0x7) == 0x7) {
+	fprintf(fp, "\n");
+    }
+}
+
+static int generate_id_map(unsigned char *buf, unsigned char *id_map) {
     int count = 0;
-    char name[256];
-    replace_ext(name, "hdr");
-    FILE *fp = fopen(name, "w");
-    name[strlen(name) - 4] = 0;
-    fprintf(fp, "static const byte %s_data[] = {\n", name);
 
     for (int y = 0; y < header.h; y += 8) {
 	for (int x = 0; x < header.w; x += 8) {
@@ -173,15 +194,46 @@ static void process_tiles(unsigned char *buf) {
 	    unsigned char *ptr = buf + y * header.w + x;
 	    get_bit_plane(ptr, result + 0, 1);
 	    get_bit_plane(ptr, result + 8, 2);
-
-	    int id = look_up_tile(result);
-	    fprintf(fp, " 0x%02x,", id);
-	    if ((count & 0x7) == 0x7) {
-		fprintf(fp, "\n");
-	    }
-	    count++;
+	    id_map[count++] = look_up_tile(result);
 	}
     }
+
+    return count;
+}
+
+static void compress_id_map(FILE *fp, unsigned char *id_map, int count) {
+    int size = 0;
+    int offset = 0;
+    while (offset < count) {
+	int max = MIN(count - offset, 128);
+	unsigned char *ptr = id_map + offset;
+	int equal = get_equal(ptr, max);
+	if (equal > 2) {
+	    print_hex(fp, 0x80 | (equal - 1), &size);
+	    print_hex(fp, *ptr, &size);
+	    offset += equal;
+	}
+	else {
+	    int diffs = get_diffs(ptr, max);
+	    print_hex(fp, diffs - 1, &size);
+	    for (int i = 0; i < diffs; i++) {
+		print_hex(fp, ptr[i], &size);
+	    }
+	    offset += diffs;
+	}
+    }
+    if (size & 7) fprintf(fp, "\n");
+}
+
+static void process_tiles(unsigned char *buf) {
+    char name[256];
+    replace_ext(name, "hdr");
+    FILE *fp = fopen(name, "w");
+    name[strlen(name) - 4] = 0;
+    fprintf(fp, "static const byte %s_data[] = {\n", name);
+
+    unsigned char id_map[header.w * header.h / 64];
+    compress_id_map(fp, id_map, generate_id_map(buf, id_map));
 
     fprintf(fp, "};\n");
 
