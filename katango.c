@@ -6,8 +6,12 @@ typedef unsigned short word;
 
 #define SIZE(array)	(sizeof(array) / sizeof(*(array)))
 
-#define PPUADDR(x)	MEM_WR(0x2006, x)
-#define PPUDATA(x)	MEM_WR(0x2007, x)
+#define PPUADDR(x) \
+    MEM_WR(0x2006, ((x) >> 8)); \
+    MEM_WR(0x2006, ((x) & 0xff))
+
+#define PPUDATA(x) \
+    MEM_WR(0x2007, x)
 
 extern byte oam_buffer[256];
 
@@ -25,8 +29,7 @@ static const byte palette[] = {
 
 void setup_palette(void) {
     byte i;
-    PPUADDR(0x3f);
-    PPUADDR(0x00);
+    PPUADDR(0x3f00);
     for (i = 0; i < SIZE(palette); i++) {
 	PPUDATA(palette[i]);
     }
