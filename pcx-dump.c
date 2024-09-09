@@ -7,8 +7,12 @@
 #include <fcntl.h>
 #include <math.h>
 
-static int fd;
+#define MAX_SIZE 4096
+
 static char *file_name;
+
+static unsigned char tileset[MAX_SIZE];
+static int tileset_size;
 
 struct Header {
     unsigned short w, h;
@@ -81,7 +85,7 @@ static void get_bit_plane(unsigned char *buf, unsigned char *ptr, int plane) {
 static void save_sprites(unsigned char *buf) {
     char tile_name[256];
     replace_ext(tile_name, "chr");
-    fd = open(tile_name, O_CREAT | O_RDWR, 0644);
+    int fd = open(tile_name, O_CREAT | O_RDWR, 0644);
     for (int y = 0; y < header.h; y += 8) {
 	for (int x = 0; x < header.w; x += 8) {
 	    unsigned char result[16];
@@ -96,7 +100,7 @@ static void save_sprites(unsigned char *buf) {
 
 static int reset_tiles(void) {
     unsigned char buf[16];
-    fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR, 0644);
+    int fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR, 0644);
     memset(buf, 0, sizeof(buf));
     write(fd, buf, sizeof(buf));
     close(fd);
@@ -104,26 +108,40 @@ static int reset_tiles(void) {
 }
 
 static int pad_tiles(void) {
-    const int max_size = 4096;
     int size = file_size(file_name);
 
-    if (size < 0 || size > max_size) {
+    if (size < 0 || size > MAX_SIZE) {
 	fprintf(stderr, "ERROR invalid tile file \"%s\"\n", file_name);
 	return -ENOENT;
     }
 
-    unsigned char *buf = malloc(max_size);
-    memset(buf, 0, max_size);
+    unsigned char *buf = malloc(MAX_SIZE);
+    memset(buf, 0, MAX_SIZE);
 
-    fd = open(file_name, O_RDWR, 0644);
+    int fd = open(file_name, O_RDWR, 0644);
     read(fd, buf, size);
     lseek(fd, 0, SEEK_SET);
-    write(fd, buf, max_size);
+    write(fd, buf, MAX_SIZE);
     close(fd);
     return 0;
 }
 
+static void load_tileset(void) {
+    tileset_size = file_size("tiles.chr");
+    int fd = open("tiles.chr", O_RDWR, 0644);
+    read(fd, tileset, tileset_size);
+    close(fd);
+}
+
+static void save_tileset(void) {
+    int fd = open("tiles.chr", O_RDWR, 0644);
+    write(fd, tileset, tileset_size);
+    close(fd);
+}
+
 static void save_tiles(unsigned char *buf) {
+    load_tileset();
+    save_tileset();
 }
 
 int main(int argc, char **argv) {
