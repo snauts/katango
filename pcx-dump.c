@@ -160,6 +160,13 @@ static int look_up_tile(unsigned char *buf) {
 }
 
 static void process_tiles(unsigned char *buf) {
+    int count = 0;
+    char name[256];
+    replace_ext(name, "hdr");
+    FILE *fp = fopen(name, "w");
+    name[strlen(name) - 4] = 0;
+    fprintf(fp, "static const byte %s_data[] = {\n", name);
+
     for (int y = 0; y < header.h; y += 8) {
 	for (int x = 0; x < header.w; x += 8) {
 	    unsigned char result[16];
@@ -168,8 +175,17 @@ static void process_tiles(unsigned char *buf) {
 	    get_bit_plane(ptr, result + 8, 2);
 
 	    int id = look_up_tile(result);
+	    fprintf(fp, " 0x%02x,", id);
+	    if ((count & 0x7) == 0x7) {
+		fprintf(fp, "\n");
+	    }
+	    count++;
 	}
     }
+
+    fprintf(fp, "};\n");
+
+    fclose(fp);
 }
 
 static void save_tiles(unsigned char *buf) {

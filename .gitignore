@@ -1,5 +1,6 @@
 *.o
 *.nes
 *.chr
+*.hdr
 code.s
 pcx-dump

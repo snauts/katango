@@ -17,4 +17,4 @@ build:
 	cl65 -o katango.nes -C katango.cfg asm.o code.o
 
 clean:
-	rm -f *.o *.chr code.s pcx-dump katango.nes
+	rm -f *.o *.hdr *.chr code.s pcx-dump katango.nes
