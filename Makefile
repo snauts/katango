@@ -5,8 +5,10 @@ run: build
 
 build:
 	gcc pcx-dump.c -o pcx-dump
-	./pcx-dump -t tiles.pcx > tiles.chr
-	./pcx-dump -t sprites.pcx > sprites.chr
+	./pcx-dump -r tiles.chr
+	./pcx-dump -t tiles.pcx
+	./pcx-dump -p tiles.chr
+	./pcx-dump -s sprites.pcx
 	ca65 katango.s -o asm.o
 	cc65 katango.c -o code.s
 	ca65 code.s -o code.o

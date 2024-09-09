@@ -7,27 +7,35 @@
 #include <fcntl.h>
 #include <math.h>
 
+static int fd;
 static char *file_name;
 
 struct Header {
     unsigned short w, h;
 } header;
 
-static unsigned char *read_pcx(const char *file) {
+static int file_size(const char *file) {
     struct stat st;
+    return stat(file, &st) != 0 ? -1 : st.st_size;
+}
+
+static unsigned char *read_pcx(const char *file) {
     int palette_offset = 16;
-    if (stat(file, &st) != 0) {
+    int size = file_size(file);
+
+    if (size < 0) {
 	fprintf(stderr, "ERROR while opening PCX-file \"%s\"\n", file);
 	return NULL;
     }
-    unsigned char *buf = malloc(st.st_size);
+
+    unsigned char *buf = malloc(size);
     int in = open(file, O_RDONLY);
-    read(in, buf, st.st_size);
+    read(in, buf, size);
     close(in);
 
     header.w = (* (unsigned short *) (buf + 0x8)) + 1;
     header.h = (* (unsigned short *) (buf + 0xa)) + 1;
-    if (buf[3] == 8) palette_offset = st.st_size - 768;
+    if (buf[3] == 8) palette_offset = size - 768;
     int unpacked_size = header.w * header.h / (buf[3] == 8 ? 1 : 2);
     unsigned char *pixels = malloc(unpacked_size);
 
@@ -56,7 +64,7 @@ static void save_tile_line(unsigned char *buf, int plane) {
 	    byte |= (0x80 >> i);
 	}
     }
-    printf("%c", byte);
+    write(fd, &byte, 1);
 }
 
 static void save_tile_plane(unsigned char *buf, int plane) {
@@ -65,7 +73,11 @@ static void save_tile_plane(unsigned char *buf, int plane) {
     }
 }
 
-static void save_tiles(unsigned char *buf) {
+static void save_sprites(unsigned char *buf) {
+    char tile_name[256];
+    strcpy(tile_name, file_name);
+    strcpy(tile_name + strlen(tile_name) - 3, "chr");
+    fd = open(tile_name, O_CREAT | O_RDWR, 0644);
     for (int y = 0; y < header.h; y += 8) {
 	for (int x = 0; x < header.w; x += 8) {
 	    unsigned char *ptr = buf + y * header.w + x;
@@ -73,24 +85,72 @@ static void save_tiles(unsigned char *buf) {
 	    save_tile_plane(ptr, 2);
 	}
     }
+    close(fd);
+}
+
+static int reset_tiles(void) {
+    unsigned char buf[16];
+    fd = open(file_name, O_CREAT | O_TRUNC | O_RDWR, 0644);
+    memset(buf, 0, sizeof(buf));
+    write(fd, buf, sizeof(buf));
+    close(fd);
+    return 0;
+}
+
+static int pad_tiles(void) {
+    const int max_size = 4096;
+    int size = file_size(file_name);
+
+    if (size < 0 || size > max_size) {
+	fprintf(stderr, "ERROR invalid tile file \"%s\"\n", file_name);
+	return -ENOENT;
+    }
+
+    unsigned char *buf = malloc(max_size);
+    memset(buf, 0, max_size);
+
+    fd = open(file_name, O_RDWR, 0644);
+    read(fd, buf, size);
+    lseek(fd, 0, SEEK_SET);
+    write(fd, buf, max_size);
+    close(fd);
+    return 0;
+}
+
+static void save_tiles(unsigned char *buf) {
 }
 
 int main(int argc, char **argv) {
+    char option;
+
     if (argc < 3) {
 	printf("USAGE: pcx-dump [option] file.pcx\n");
+	printf("  -r   reset tiles\n");
 	printf("  -t   save tiles\n");
-	printf("  -l   save layout\n");
+	printf("  -p   pad tiles\n");
+	printf("  -s   save sprites\n");
 	return 0;
     }
 
     file_name = argv[2];
+    option = argv[1][1];
+
+    switch (option) {
+    case 'r':
+	return reset_tiles();
+    case 'p':
+	return pad_tiles();
+    }
 
     unsigned char *buf = read_pcx(file_name);
     if (buf == NULL) return -ENOENT;
 
-    switch (argv[1][1]) {
+    switch (option) {
     case 't':
 	save_tiles(buf);
+	break;
+    case 's':
+	save_sprites(buf);
 	break;
     }
 

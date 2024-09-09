@@ -103,7 +103,7 @@ rst:
 	jsr	wait_vblank
 	jsr	clear_memory
 	jsr	wait_vblank
-	jsr	setup_pallete
+	jsr	setup_palette
 	jsr	wait_vblank
 
 	lda	#%0000000
@@ -149,7 +149,7 @@ hide_all_sprites:
 	bne	:-
 	rts
 
-setup_pallete:
+setup_palette:
 	lda	#$3F
 	sta	PPUADDR
 	lda	#$00
