@@ -16,6 +16,8 @@
 
 .segment "ZEROPAGE"
 
+.import sp
+
 .segment "BSS"
 
 .segment "OAM"
@@ -102,6 +104,9 @@ rst:
 	jsr	wait_vblank
 	jsr	_setup_palette
 	jsr	wait_vblank
+
+	ldx	#$20
+	stx	sp + 1
 
 	lda	#%0000000
 	sta	PPUSCROLL

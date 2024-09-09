@@ -43,8 +43,6 @@ static volatile word ppu_addr;
 static volatile byte ppu_count;
 static volatile byte ppu_buffer[32];
 
-static const byte *arg_ptr;
-
 #pragma bss-name (pop)
 
 void irq_handler(void) {
@@ -73,25 +71,18 @@ static void wipe_screen(void) {
     }
 }
 
-static void draw_image(void) {
+static void draw_image(const byte *data) {
     byte x, y;
-    word i = 0;
     ppu_addr = 0x2020;
     for (y = 0; y < 28; y++) {
 	for (x = 0; x < 32; x++) {
-	    ppu_buffer[x] = arg_ptr[i];
-	    i++;
+	    ppu_buffer[x] = *data++;
 	}
 	ppu_update_row();
     }
 }
 
-static void draw_title(void) {
-    arg_ptr = title_data;
-    draw_image();
-}
-
 void game_startup(void) {
     wipe_screen();
-    draw_title();
+    draw_image(title_data);
 }
