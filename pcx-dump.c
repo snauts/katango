@@ -139,8 +139,42 @@ static void save_tileset(void) {
     close(fd);
 }
 
+static int tile_cmp(unsigned char *a, unsigned char *b) {
+    for (int i = 0; i < 16; i++) {
+	if (a[i] != b[i]) return 0;
+    }
+    return 1;
+}
+
+static int look_up_tile(unsigned char *buf) {
+    for (int i = 0; i < tileset_size; i += 16) {
+	if (tile_cmp(buf, tileset + i)) {
+	    return i / 16;
+	}
+    }
+    if (tileset_size < MAX_SIZE) {
+	memcpy(tileset + tileset_size, buf, 16);
+	tileset_size += 16;
+    }
+    return (tileset_size / 16) - 1;
+}
+
+static void process_tiles(unsigned char *buf) {
+    for (int y = 0; y < header.h; y += 8) {
+	for (int x = 0; x < header.w; x += 8) {
+	    unsigned char result[16];
+	    unsigned char *ptr = buf + y * header.w + x;
+	    get_bit_plane(ptr, result + 0, 1);
+	    get_bit_plane(ptr, result + 8, 2);
+
+	    int id = look_up_tile(result);
+	}
+    }
+}
+
 static void save_tiles(unsigned char *buf) {
     load_tileset();
+    process_tiles(buf);
     save_tileset();
 }
 
