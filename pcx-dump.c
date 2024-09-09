@@ -205,17 +205,17 @@ static void compress_id_map(FILE *fp, unsigned char *id_map, int count) {
     int size = 0;
     int offset = 0;
     while (offset < count) {
-	int max = MIN(count - offset, 128);
+	int max = MIN(count - offset, 127);
 	unsigned char *ptr = id_map + offset;
 	int equal = get_equal(ptr, max);
 	if (equal > 2) {
-	    print_hex(fp, 0x80 | (equal - 1), &size);
+	    print_hex(fp, 0x80 | equal, &size);
 	    print_hex(fp, *ptr, &size);
 	    offset += equal;
 	}
 	else {
 	    int diffs = get_diffs(ptr, max);
-	    print_hex(fp, diffs - 1, &size);
+	    print_hex(fp, diffs, &size);
 	    for (int i = 0; i < diffs; i++) {
 		print_hex(fp, ptr[i], &size);
 	    }

@@ -73,10 +73,27 @@ static void wipe_screen(void) {
 
 static void draw_image(const byte *data) {
     byte x, y;
+    byte equal = 0;
+    byte diffs = 0;
     ppu_addr = 0x2020;
     for (y = 0; y < 28; y++) {
-	for (x = 0; x < 32; x++) {
-	    ppu_buffer[x] = *data++;
+	x = 0;
+	while (x < 32) {
+	    if (equal > 0) {
+		ppu_buffer[x++] = *data;
+		if (--equal > 0) continue;
+	    }
+	    else if (diffs > 0) {
+		ppu_buffer[x++] = *data;
+		diffs--;
+	    }
+	    else if (*data & 0x80) {
+		equal = *data & ~0x80;
+	    }
+	    else {
+		diffs = *data;
+	    }
+	    data++;
 	}
 	ppu_update_row();
     }
