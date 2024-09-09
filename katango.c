@@ -35,9 +35,13 @@ void setup_palette(void) {
     }
 }
 
+#pragma bss-name (push, "ZEROPAGE")
+
 static volatile word ppu_addr;
 static volatile byte ppu_count;
 static volatile byte ppu_buffer[32];
+
+#pragma bss-name (pop)
 
 void irq_handler(void) {
     byte i;
@@ -66,4 +70,5 @@ static void wipe_screen(void) {
 }
 
 void game_startup(void) {
+    wipe_screen();
 }
