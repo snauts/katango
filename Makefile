@@ -6,7 +6,7 @@ run: build
 build:
 	gcc pcx-dump.c -o pcx-dump
 	./pcx-dump -r tiles.chr
-	./pcx-dump -t tiles.pcx
+	./pcx-dump -t title.pcx
 	./pcx-dump -p tiles.chr
 	./pcx-dump -s sprites.pcx
 	ca65 katango.s -o asm.o
