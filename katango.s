@@ -63,6 +63,11 @@ nmi:
 	lda	#>_oam_buffer
 	sta	OAMDMA
 
+	stx	PPUSCROLL
+	stx	PPUSCROLL
+	lda	#%10001000
+	sta	PPUCTRL
+
 	lda	#%00011110
 	sta	PPUMASK
 
