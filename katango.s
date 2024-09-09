@@ -19,19 +19,9 @@
 .segment "BSS"
 
 .segment "OAM"
-oam_buffer:	.res 256
+_oam_buffer:	.res 256
 
 .segment "RODATA"
-palette:
-.byte $0F, $03, $13, $23
-.byte $0F, $0F, $0F, $0F
-.byte $0F, $08, $18, $28
-.byte $0F, $09, $19, $29
-
-.byte $0F, $06, $16, $30
-.byte $0F, $27, $28, $10
-.byte $0F, $06, $16, $37
-.byte $0F, $06, $16, $17
 
 .segment "SAMPLE"
 
@@ -39,6 +29,8 @@ palette:
 
 .import _irq_handler
 .import _game_startup
+.import _setup_palette
+.export _oam_buffer
 
 PPUCTRL		= $2000
 PPUMASK		= $2001
@@ -68,7 +60,7 @@ nmi:
 	stx	PPUMASK
 
 	stx	OAMADDR
-	lda	#>oam_buffer
+	lda	#>_oam_buffer
 	sta	OAMDMA
 
 	lda	#%00011110
@@ -103,7 +95,7 @@ rst:
 	jsr	wait_vblank
 	jsr	clear_memory
 	jsr	wait_vblank
-	jsr	setup_palette
+	jsr	_setup_palette
 	jsr	wait_vblank
 
 	lda	#%0000000
@@ -141,26 +133,10 @@ hide_all_sprites:
 	lda	#255
 	ldx	#0
 :
-	sta	oam_buffer, X
+	sta	_oam_buffer, X
 	inx
 	inx
 	inx
 	inx
 	bne	:-
-	rts
-
-setup_palette:
-	lda	#$3F
-	sta	PPUADDR
-	lda	#$00
-	sta	PPUADDR
-
-	ldx	#0
-:
-	lda	palette, x
-	sta	PPUDATA
-	inx
-	cpx	#32
-	bcc	:-
-
 	rts

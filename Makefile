@@ -1,3 +1,5 @@
+CFLAGS = -O --static-locals
+
 all: build
 
 run: build
@@ -10,7 +12,7 @@ build:
 	./pcx-dump -p tiles.chr
 	./pcx-dump -s sprites.pcx
 	ca65 katango.s -o asm.o
-	cc65 katango.c -o code.s
+	cc65 katango.c $(CFLAGS) -o code.s
 	ca65 code.s -o code.o
 	ld65 -o katango.nes -C katango.cfg asm.o code.o
 
