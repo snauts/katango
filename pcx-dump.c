@@ -19,6 +19,11 @@ static int file_size(const char *file) {
     return stat(file, &st) != 0 ? -1 : st.st_size;
 }
 
+static void replace_ext(char *name, const char *ext) {
+    strcpy(name, file_name);
+    strcpy(name + strlen(file_name) - strlen(ext), ext);
+}
+
 static unsigned char *read_pcx(const char *file) {
     int palette_offset = 16;
     int size = file_size(file);
@@ -57,32 +62,33 @@ static unsigned char *read_pcx(const char *file) {
     return pixels;
 }
 
-static void save_tile_line(unsigned char *buf, int plane) {
+static unsigned char get_bit_line(unsigned char *buf, int plane) {
     unsigned char byte = 0;
     for (int i = 0; i < 8; i++) {
 	if (buf[i] & plane) {
 	    byte |= (0x80 >> i);
 	}
     }
-    write(fd, &byte, 1);
+    return byte;
 }
 
-static void save_tile_plane(unsigned char *buf, int plane) {
+static void get_bit_plane(unsigned char *buf, unsigned char *ptr, int plane) {
     for (int y = 0; y < 8; y++) {
-	save_tile_line(buf + y * header.w, plane);
+	ptr[y] = get_bit_line(buf + y * header.w, plane);
     }
 }
 
 static void save_sprites(unsigned char *buf) {
     char tile_name[256];
-    strcpy(tile_name, file_name);
-    strcpy(tile_name + strlen(tile_name) - 3, "chr");
+    replace_ext(tile_name, "chr");
     fd = open(tile_name, O_CREAT | O_RDWR, 0644);
     for (int y = 0; y < header.h; y += 8) {
 	for (int x = 0; x < header.w; x += 8) {
+	    unsigned char result[16];
 	    unsigned char *ptr = buf + y * header.w + x;
-	    save_tile_plane(ptr, 1);
-	    save_tile_plane(ptr, 2);
+	    get_bit_plane(ptr, result + 0, 1);
+	    get_bit_plane(ptr, result + 8, 2);
+	    write(fd, result, 16);
 	}
     }
     close(fd);
