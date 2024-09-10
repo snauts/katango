@@ -198,10 +198,15 @@ static void draw_screen(const byte *data) {
     decode_rle(data, 0x2020, 28);
 }
 
+static void attr_screen(const byte *data) {
+    decode_rle(data, 0x23c0, 2);
+}
+
 void game_startup(void) {
     hw_init();
     wipe_screen();
     draw_screen(title_data);
+    attr_screen(title_attr);
 
     update_palette(1, 0x03);
     update_palette(2, 0x13);
