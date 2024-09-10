@@ -1,3 +1,25 @@
+void sdcc_deps(void) __naked {
+    __asm__(".area ZP (PAG)");
+    __asm__("REGTEMP::	.ds 8");
+    __asm__("DPTR::	.ds 2");
+    __asm__(".area CODE");
+}
+
+void irq(void) __naked {
+    __asm__("rti");
+}
+
+void nmi(void) __naked {
+    __asm__("rti");
+}
+
+void rst(void) __naked {
+    __asm__("sei");
+    __asm__("cld");
+    __asm__("ldx #0xff");
+    __asm__("txs");
+}
+
 typedef signed char int8;
 typedef unsigned char byte;
 typedef unsigned short word;
@@ -101,4 +123,16 @@ static void draw_image(const byte *data) {
 void game_startup(void) {
     wipe_screen();
     draw_image(title_data);
+
+    update_palette(1, 0x03);
+    update_palette(2, 0x13);
+    update_palette(2, 0x23);
+}
+
+/* must be very last */
+void jump_vectors(void) __naked {
+    __asm__(".area VECTOR (PAG)");
+    __asm__("nmi_ptr::	.dw _nmi");
+    __asm__("rst_ptr::	.dw _rst");
+    __asm__("irq_ptr::	.dw _irq");
 }
