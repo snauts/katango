@@ -4,10 +4,16 @@ typedef unsigned short word;
 
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
-    __asm__("REGTEMP:	.ds 8");
-    __asm__("DPTR:	.ds 2");
+    __asm__("REGTEMP:		.ds 8");
+    __asm__("DPTR:		.ds 2");
+    __asm__("_ppu_addr:		.ds 2");
+    __asm__("_ppu_count:	.ds 1");
+    __asm__("_ppu_buffer:	.ds 32");
+    __asm__("_counter:		.ds 1");
+
     __asm__(".area OAM (PAG)");
-    __asm__("_oam:	.ds 256");
+    __asm__("_oam:		.ds 256");
+
     __asm__(".area CODE");
 }
 
@@ -44,7 +50,7 @@ void rst(void) __naked {
 
 #include "title.hdr"
 
-#define BIT(n)		(1 << (n))
+#define BIT(n)		(((byte) 1) << (n))
 
 #define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
@@ -108,11 +114,11 @@ static void hw_init(void) {
     ppu_ctrl();
 }
 
-static volatile word ppu_addr;
-static volatile byte ppu_count;
-static volatile byte ppu_buffer[32];
+extern volatile word ppu_addr;
+extern volatile byte ppu_count;
+extern volatile byte ppu_buffer[32];
 
-static volatile byte counter;
+extern volatile byte counter;
 
 void irq_handler(void) {
     byte i;
