@@ -216,6 +216,9 @@ void game_startup(void) {
     update_palette(6, 0x14);
     update_palette(7, 0x24);
 
+    update_palette(13, 0x16);
+    update_palette(14, 0x26);
+
     for (;;) { }
 }
 
