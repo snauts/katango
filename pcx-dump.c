@@ -213,10 +213,13 @@ static int look_up_attr(unsigned char *buf) {
 }
 
 static int attr_block(unsigned char *buf) {
-    return look_up_attr(buf)
-	| (look_up_attr(buf + 16) << 2)
-	| (look_up_attr(buf + (header.w * 16)) << 4)
-	| (look_up_attr(buf + (header.w * 16) + 16) << 6);
+    int result = 0, offset[] = {
+	header.w * 16 + 16, header.w * 16, 16, 0
+    };
+    for (int i = 0; i < 4; i++) {
+	result = (result << 2) | look_up_attr(buf + offset[i]);
+    }
+    return result;
 }
 
 static int generate_attr_map(unsigned char *buf, unsigned char *map) {
