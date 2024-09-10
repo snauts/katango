@@ -7,17 +7,17 @@ run: build
 	fceux katango.nes
 
 build:
-	gcc pcx-dump.c -o pcx-dump
-	./pcx-dump -r tiles.chr
-	./pcx-dump -t title.pcx
-	./pcx-dump -p tiles.chr
-	./pcx-dump -s sprites.pcx
+	gcc pcx-dump.c -o pcx-dump.bin
+	./pcx-dump.bin -r tiles.chr
+	./pcx-dump.bin -t title.pcx
+	./pcx-dump.bin -p tiles.chr
+	./pcx-dump.bin -s sprites.pcx
 	@echo Compile katango.c
 	@sdcc -mmos6502 $(CFLAGS) katango.c -c
 	@echo Link katango.ihx
 	@sdld $(LFLAGS) -m -i katango.ihx katango.rel
 	hex2bin katango.ihx > /dev/null
-	cat header.bin katango.bin tiles.chr sprites.chr > katango.nes
+	cat header.rom katango.bin tiles.chr sprites.chr > katango.nes
 
 clean:
-	rm -f *.o *.hdr *.chr code.s pcx-dump katango.nes
+	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.bin *.nes

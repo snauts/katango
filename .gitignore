@@ -1,6 +1,10 @@
-*.o
-*.nes
+*.asm
+*.ihx
+*.lst
+*.map
+*.rel
+*.sym
 *.chr
 *.hdr
-code.s
-pcx-dump
+*.bin
+*.nes
