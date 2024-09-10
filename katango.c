@@ -157,11 +157,11 @@ static void ppu_update_row(void) {
 
 static void wipe_screen(void) {
     byte i;
-    ppu_addr = 0x2020;
+    ppu_addr = 0x2000;
     for (i = 0; i < 32; i++) {
 	ppu_buffer[i] = 0;
     }
-    for (i = 0; i < 28; i++) {
+    for (i = 0; i < 30; i++) {
 	ppu_update_row();
     }
 }
@@ -195,7 +195,7 @@ static void decode_rle(const byte *data, word where, byte rows) {
 }
 
 static void draw_screen(const byte *data) {
-    decode_rle(data, 0x2020, 28);
+    decode_rle(data, 0x2000, 30);
 }
 
 static void attr_screen(const byte *data) {

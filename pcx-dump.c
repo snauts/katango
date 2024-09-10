@@ -201,8 +201,34 @@ static int generate_data_map(unsigned char *buf, unsigned char *map) {
     return count;
 }
 
+static int look_up_attr(unsigned char *buf) {
+    int attr = 0;
+    for (int y = 0; y < 16; y++) {
+	for (int x = 0; x < 16; x++) {
+	    int offset = x + y * header.w;
+	    attr = MAX(attr, (buf[offset] >> 2) & 3);
+	}
+    }
+    return attr;
+}
+
+static int attr_block(unsigned char *buf) {
+    return look_up_attr(buf)
+	| (look_up_attr(buf + 16) << 2)
+	| (look_up_attr(buf + (header.w * 16)) << 4)
+	| (look_up_attr(buf + (header.w * 16) + 16) << 6);
+}
+
 static int generate_attr_map(unsigned char *buf, unsigned char *map) {
+    int i = 0;
     memset(map, 0, 64);
+
+    for (int y = 0; y < header.h; y += 32) {
+	for (int x = 0; x < header.w; x += 32) {
+	    map[i++] = attr_block(buf + y * header.w + x);
+	}
+    }
+
     return 64;
 }
 
