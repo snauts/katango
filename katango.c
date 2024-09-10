@@ -66,6 +66,10 @@ void rst(void) __naked {
 #define PPUADDR(x)	MEM_WR(0x2006, x)
 #define PPUDATA(x)	MEM_WR(0x2007, x)
 
+#define NOISE_VL(x)	MEM_WR(0x400C, x)
+#define NOISE_LO(x)	MEM_WR(0x400E, x)
+#define NOISE_HI(x)	MEM_WR(0x400F, x)
+
 #define DMCFREQ(x)	MEM_WR(0x4010, x)
 #define OAMDMA(x)	MEM_WR(0x4014, x)
 #define SND_CHN(x)	MEM_WR(0x4015, x)
@@ -202,22 +206,71 @@ static void attr_screen(const byte *data) {
     decode_rle(data, 0x23c0, 2);
 }
 
+static void shiver_palette(byte idx, byte color) {
+    NOISE_VL(idx);
+    for (byte i = 0; i < 4; i++) {
+	update_palette(idx, 0x0f);
+	delay(2);
+	update_palette(idx, color);
+	delay(2);
+	NOISE_LO(i << 2);
+	NOISE_HI(0x08);
+    }
+}
+
+static void rotate_palette_border(byte wait, char snd) {
+    static const byte roll[] = {
+	0x0f, 0x04, 0x14,
+	0x0f, 0x0f, 0x04,
+	0x0f, 0x0f, 0x0f,
+
+	0x24, 0x0f, 0x0f,
+	0x14, 0x24, 0x0f,
+	0x04, 0x14, 0x24,
+    };
+
+    NOISE_VL(0x30 | (6 - snd));
+    NOISE_HI(0x08);
+
+    for (byte i = 0; i < sizeof(roll); i += 3) {
+	for (byte n = 0; n < 3; n++) {
+	    update_palette(5 + n, roll[i + n]);
+	}
+	NOISE_LO(snd + 11);
+	snd = snd - 1;
+    }
+    delay(wait);
+}
+
+static void animate_title_text(void) {
+    shiver_palette(0x07, 0x04);
+    shiver_palette(0x06, 0x04);
+    update_palette(0x07, 0x14);
+    shiver_palette(0x05, 0x04);
+    rotate_palette_border(2, 0);
+    update_palette(0x03, 0x03);
+    rotate_palette_border(1, 1);
+    update_palette(0x02, 0x03);
+    update_palette(0x03, 0x13);
+    rotate_palette_border(0, 2);
+    update_palette(0x01, 0x03);
+    update_palette(0x02, 0x13);
+    update_palette(0x03, 0x23);
+    rotate_palette_border(2, 3);
+    update_palette(0x0e, 0x16);
+    rotate_palette_border(1, 4);
+    update_palette(0x0d, 0x16);
+    update_palette(0x0e, 0x26);
+    NOISE_VL(0);
+}
+
 void game_startup(void) {
     hw_init();
+
     wipe_screen();
     draw_screen(title_data);
     attr_screen(title_attr);
-
-    update_palette(1, 0x03);
-    update_palette(2, 0x13);
-    update_palette(3, 0x23);
-
-    update_palette(5, 0x04);
-    update_palette(6, 0x14);
-    update_palette(7, 0x24);
-
-    update_palette(13, 0x16);
-    update_palette(14, 0x26);
+    animate_title_text();
 
     for (;;) { }
 }
