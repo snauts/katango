@@ -166,12 +166,12 @@ static void wipe_screen(void) {
     }
 }
 
-static void draw_image(const byte *data) {
+static void decode_rle(const byte *data, word where, byte rows) {
     byte x, y;
     byte equal = 0;
     byte diffs = 0;
-    ppu_addr = 0x2020;
-    for (y = 0; y < 28; y++) {
+    ppu_addr = where;
+    for (y = 0; y < rows; y++) {
 	x = 0;
 	while (x < 32) {
 	    if (equal > 0) {
@@ -194,10 +194,14 @@ static void draw_image(const byte *data) {
     }
 }
 
+static void draw_screen(const byte *data) {
+    decode_rle(data, 0x2020, 28);
+}
+
 void game_startup(void) {
     hw_init();
     wipe_screen();
-    draw_image(title_data);
+    draw_screen(title_data);
 
     update_palette(1, 0x03);
     update_palette(2, 0x13);
