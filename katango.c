@@ -138,8 +138,8 @@ void irq_handler(void) {
 }
 
 static void delay(byte ticks) {
-    byte now = counter;
-    while (counter - now < ticks) { }
+    byte next = counter + ticks;
+    while (next != counter) { }
 }
 
 static void update_palette(byte idx, byte val) {
