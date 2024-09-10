@@ -218,7 +218,7 @@ static void shiver_palette(byte idx, byte color) {
     }
 }
 
-static void rotate_palette_border(byte wait, char snd) {
+static void rotate_palette_border(byte wait, byte snd) {
     static const byte roll[] = {
 	0x0f, 0x04, 0x14,
 	0x0f, 0x0f, 0x04,
@@ -232,12 +232,13 @@ static void rotate_palette_border(byte wait, char snd) {
     NOISE_VL(0x30 | (6 - snd));
     NOISE_HI(0x08);
 
+    byte period = snd + 11;
     for (byte i = 0; i < sizeof(roll); i += 3) {
 	for (byte n = 0; n < 3; n++) {
 	    update_palette(5 + n, roll[i + n]);
 	}
-	NOISE_LO(snd + 11);
-	snd = snd - 1;
+	NOISE_LO(period--);
+	delay(snd);
     }
     delay(wait);
 }
