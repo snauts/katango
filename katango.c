@@ -4,8 +4,8 @@ typedef unsigned short word;
 
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
-    __asm__("REGTEMP::	.ds 8");
-    __asm__("DPTR::	.ds 2");
+    __asm__("REGTEMP:	.ds 8");
+    __asm__("DPTR:	.ds 2");
     __asm__(".area OAM (PAG)");
     __asm__("_oam:	.ds 256");
     __asm__(".area CODE");
@@ -44,6 +44,8 @@ void rst(void) __naked {
 
 #include "title.hdr"
 
+#define BIT(n)		(1 << (n))
+
 #define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
 
@@ -72,7 +74,7 @@ static void clear_palette(void) {
     PPUADDR(0x3f);
     PPUADDR(0x00);
     for (byte i = 0; i < 32; i++) {
-	PPUDATA(0xF);
+	PPUDATA(0x0f);
     }
 }
 
@@ -85,22 +87,25 @@ static void init_oam_data(void) {
     } while (i != 0);
 }
 
+static void ppu_ctrl(void) {
+    PPUSCROLL(0x00);
+    PPUSCROLL(0x00);
+    PPUCTRL(BIT(7) | BIT(3));
+}
+
 static void hw_init(void) {
     JOY2(0x40);
-    PPUCTRL(0);
-    PPUMASK(0);
-    DMCFREQ(0);
-    SND_CHN(0xf);
+    PPUCTRL(0x00);
+    PPUMASK(0x00);
+    DMCFREQ(0x00);
+    SND_CHN(0x0f);
 
     wait_vblank();
     init_oam_data();
     wait_vblank();
     clear_palette();
     wait_vblank();
-
-    PPUSCROLL(0);
-    PPUSCROLL(0);
-    PPUCTRL(0x88);
+    ppu_ctrl();
 }
 
 static volatile word ppu_addr;
@@ -118,6 +123,12 @@ void irq_handler(void) {
     }
     ppu_count = 0;
     counter++;
+
+    PPUMASK(0x00);
+    OAMADDR(0x00);
+    OAMDMA(0x02); /* oam addr high byte */
+    ppu_ctrl();
+    PPUMASK(0x1e);
 }
 
 static void delay(byte ticks) {
