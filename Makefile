@@ -1,5 +1,5 @@
 CFLAGS = --nostdinc --nostdlib --no-std-crt0 --no-zp-spill --opt-code-speed
-LFLAGS = -b CODE=0x8000 -b VECTOR=0xfffa
+LFLAGS = -b OAM=0x200 -b BSS=0x300 -b CODE=0x8000 -b VECTOR=0xfffa
 
 all: build
 

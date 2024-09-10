@@ -1,7 +1,13 @@
+typedef signed char int8;
+typedef unsigned char byte;
+typedef unsigned short word;
+
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
     __asm__("REGTEMP::	.ds 8");
     __asm__("DPTR::	.ds 2");
+    __asm__(".area OAM (PAG)");
+    __asm__("_oam:	.ds 256");
     __asm__(".area CODE");
 }
 
@@ -10,6 +16,20 @@ void irq(void) __naked {
 }
 
 void nmi(void) __naked {
+    __asm__("pha");
+    __asm__("txa");
+    __asm__("pha");
+    __asm__("tya");
+    __asm__("pha");
+
+    __asm__("jsr _irq_handler");
+
+    __asm__("pla");
+    __asm__("tay");
+    __asm__("pla");
+    __asm__("tax");
+    __asm__("pla");
+
     __asm__("rti");
 }
 
@@ -18,33 +38,69 @@ void rst(void) __naked {
     __asm__("cld");
     __asm__("ldx #0xff");
     __asm__("txs");
-}
 
-typedef signed char int8;
-typedef unsigned char byte;
-typedef unsigned short word;
+    __asm__("jsr _game_startup");
+}
 
 #include "title.hdr"
 
+#define MEM_RD(a)	(* (volatile byte *) (a))
 #define MEM_WR(a, x)	(* (volatile byte *) (a) = (x))
 
 #define SIZE(array)	(sizeof(array) / sizeof(*(array)))
 
-#define PPUADDR(x) \
-    MEM_WR(0x2006, ((x) >> 8)); \
-    MEM_WR(0x2006, ((x) & 0xff))
+#define PPUCTRL(x)	MEM_WR(0x2000, x)
+#define PPUMASK(x)	MEM_WR(0x2001, x)
+#define PPUSTATUS()	MEM_RD(0x2002)
+#define OAMADDR(x)	MEM_WR(0x2003, x)
+#define OAMDATA(x)	MEM_WR(0x2004, x)
+#define PPUSCROLL(x)	MEM_WR(0x2005, x)
+#define PPUADDR(x)	MEM_WR(0x2006, x)
+#define PPUDATA(x)	MEM_WR(0x2007, x)
 
-#define PPUDATA(x) \
-    MEM_WR(0x2007, x)
+#define DMCFREQ(x)	MEM_WR(0x4010, x)
+#define OAMDMA(x)	MEM_WR(0x4014, x)
+#define SND_CHN(x)	MEM_WR(0x4015, x)
+#define JOY1(x)		MEM_WR(0x4016, x)
+#define JOY2(x)		MEM_WR(0x4017, x)
 
-extern byte oam_buffer[256];
+static void wait_vblank(void) {
+    while ((PPUSTATUS() & 0x80) == 0) { }
+}
 
-void setup_palette(void) {
-    byte i;
-    PPUADDR(0x3f00);
-    for (i = 0; i < 32; i++) {
+static void clear_palette(void) {
+    PPUADDR(0x3f);
+    PPUADDR(0x00);
+    for (byte i = 0; i < 32; i++) {
 	PPUDATA(0xF);
     }
+}
+
+extern byte oam[256];
+
+static void init_oam_data(void) {
+    byte i = 0;
+    do {
+	oam[i++] = 255;
+    } while (i != 0);
+}
+
+static void hw_init(void) {
+    JOY2(0x40);
+    PPUCTRL(0);
+    PPUMASK(0);
+    DMCFREQ(0);
+    SND_CHN(0xf);
+
+    wait_vblank();
+    init_oam_data();
+    wait_vblank();
+    clear_palette();
+    wait_vblank();
+
+    PPUSCROLL(0);
+    PPUSCROLL(0);
+    PPUCTRL(0x88);
 }
 
 static volatile word ppu_addr;
@@ -55,7 +111,8 @@ static volatile byte counter;
 
 void irq_handler(void) {
     byte i;
-    PPUADDR(ppu_addr);
+    PPUADDR(ppu_addr >> 8);
+    PPUADDR(ppu_addr & 0xff);
     for (i = 0; i < ppu_count; i++) {
 	PPUDATA(ppu_buffer[i]);
     }
@@ -121,12 +178,19 @@ static void draw_image(const byte *data) {
 }
 
 void game_startup(void) {
+    hw_init();
     wipe_screen();
     draw_image(title_data);
 
     update_palette(1, 0x03);
     update_palette(2, 0x13);
-    update_palette(2, 0x23);
+    update_palette(3, 0x23);
+
+    update_palette(5, 0x04);
+    update_palette(6, 0x14);
+    update_palette(7, 0x24);
+
+    for (;;) { }
 }
 
 /* must be very last */
