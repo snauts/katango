@@ -17,33 +17,19 @@ typedef unsigned short word;
 
 extern byte oam_buffer[256];
 
-static const byte palette[] = {
-    0x0F, 0x03, 0x13, 0x23,
-    0x0F, 0x0F, 0x0F, 0x0F,
-    0x0F, 0x08, 0x18, 0x28,
-    0x0F, 0x09, 0x19, 0x29,
-
-    0x0F, 0x06, 0x16, 0x30,
-    0x0F, 0x27, 0x28, 0x10,
-    0x0F, 0x06, 0x16, 0x37,
-    0x0F, 0x06, 0x16, 0x17,
-};
-
 void setup_palette(void) {
     byte i;
     PPUADDR(0x3f00);
-    for (i = 0; i < SIZE(palette); i++) {
-	PPUDATA(palette[i]);
+    for (i = 0; i < 32; i++) {
+	PPUDATA(0xF);
     }
 }
-
-#pragma bss-name (push, "ZEROPAGE")
 
 static volatile word ppu_addr;
 static volatile byte ppu_count;
 static volatile byte ppu_buffer[32];
 
-#pragma bss-name (pop)
+static volatile byte counter;
 
 void irq_handler(void) {
     byte i;
@@ -52,6 +38,19 @@ void irq_handler(void) {
 	PPUDATA(ppu_buffer[i]);
     }
     ppu_count = 0;
+    counter++;
+}
+
+static void delay(byte ticks) {
+    byte now = counter;
+    while (counter - now < ticks) { }
+}
+
+static void update_palette(byte idx, byte val) {
+    ppu_addr = 0x3f00 | idx;
+    ppu_buffer[ppu_count] = val;
+    ppu_count++;
+    while (ppu_count > 0) { }
 }
 
 static void ppu_update_row(void) {
