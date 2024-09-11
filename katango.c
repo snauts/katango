@@ -85,6 +85,12 @@ void rst(void) __naked {
 #define BUTTON_LEFT	BIT(6)
 #define BUTTON_RIGHT	BIT(7)
 
+extern volatile word ppu_addr;
+extern volatile byte ppu_count;
+extern volatile byte ppu_buffer[32];
+
+extern volatile byte counter;
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
 }
@@ -126,12 +132,6 @@ static void hw_init(void) {
     wait_vblank();
     ppu_ctrl();
 }
-
-extern volatile word ppu_addr;
-extern volatile byte ppu_count;
-extern volatile byte ppu_buffer[32];
-
-extern volatile byte counter;
 
 void irq_handler(void) {
     byte i;
