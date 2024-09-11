@@ -187,15 +187,23 @@ static void ppu_update_row(void) {
     ppu_addr += 32;
 }
 
+static void wipe_palette(void) {
+    ppu_addr = 0x3f00;
+    for (byte i = 0; i < 32; i++) {
+	ppu_buffer[i] = 0xf;
+    }
+    ppu_update_row();
+}
+
 static void wipe_screen(void) {
-    byte i;
     ppu_addr = 0x2000;
-    for (i = 0; i < 32; i++) {
+    for (byte i = 0; i < 32; i++) {
 	ppu_buffer[i] = 0;
     }
-    for (i = 0; i < 30; i++) {
+    for (byte i = 0; i < 30; i++) {
 	ppu_update_row();
     }
+    wipe_palette();
 }
 
 static void decode_rle(const byte *data, word where, byte rows) {
