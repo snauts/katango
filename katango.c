@@ -115,6 +115,10 @@ static byte check_button(void) {
     return press;
 }
 
+static void wait_start_button(void) {
+    while (!(check_button() & BUTTON_START)) { }
+}
+
 static void clear_palette(void) {
     PPUADDR(0x3f);
     PPUADDR(0x00);
@@ -303,14 +307,14 @@ static void animate_title_text(void) {
 void game_startup(void) {
     hw_init();
 
-  repeat:
-    wipe_screen();
-    draw_screen(title_data);
-    attr_screen(title_attr);
-    animate_title_text();
+    for (;;) {
+	wipe_screen();
+	draw_screen(title_data);
+	attr_screen(title_attr);
+	animate_title_text();
 
-    while (!(check_button() & BUTTON_START)) { }
-    goto repeat;
+	wait_start_button();
+    }
 }
 
 /* must be very last */
