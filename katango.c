@@ -257,11 +257,10 @@ static void animate_title_text(void) {
     update_palette(0x01, 0x03);
     update_palette(0x02, 0x13);
     update_palette(0x03, 0x23);
-    rotate_palette_border(2, 3);
-    update_palette(0x0e, 0x16);
-    rotate_palette_border(1, 4);
-    update_palette(0x0d, 0x16);
+    rotate_palette_border(3, 3);
+    rotate_palette_border(3, 4);
     update_palette(0x0e, 0x26);
+    update_palette(0x0d, 0x16);
     NOISE_VL(0);
 }
 
