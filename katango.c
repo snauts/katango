@@ -50,6 +50,7 @@ void rst(void) __naked {
 }
 
 #include "title.hdr"
+#include "alley.hdr"
 
 #define BIT(n)		(((byte) 1) << (n))
 
@@ -185,10 +186,10 @@ static void update_palette(byte idx, byte val) {
     while (ppu_count > 0) { }
 }
 
-static void ppu_update_row(void) {
-    ppu_count = 32;
+static void ppu_update(byte amount) {
+    ppu_count = amount;
     while (ppu_count > 0) { }
-    ppu_addr += 32;
+    ppu_addr += amount;
 }
 
 static void wipe_palette(void) {
@@ -196,7 +197,15 @@ static void wipe_palette(void) {
     for (byte i = 0; i < 32; i++) {
 	ppu_buffer[i] = 0xf;
     }
-    ppu_update_row();
+    ppu_update(32);
+}
+
+static void setup_palette(const byte *ptr, byte offset, byte amount) {
+    ppu_addr = 0x3f00 + offset;
+    for (byte i = 0; i < amount; i++) {
+	ppu_buffer[i] = ptr[i];
+    }
+    ppu_update(amount);
 }
 
 static void wipe_screen(void) {
@@ -205,7 +214,7 @@ static void wipe_screen(void) {
 	ppu_buffer[i] = 0;
     }
     for (byte i = 0; i < 30; i++) {
-	ppu_update_row();
+	ppu_update(32);
     }
     wipe_palette();
 }
@@ -234,7 +243,7 @@ static void decode_rle(const byte *data, word where, byte rows) {
 	    }
 	    data++;
 	}
-	ppu_update_row();
+	ppu_update(32);
     }
 }
 
@@ -304,15 +313,27 @@ static void animate_title_text(void) {
     NOISE_VL(0);
 }
 
+static const byte alley_palette[] = {
+    0x0f, 0x00, 0x10, 0x20,
+    0x0f, 0x07, 0x17, 0x09,
+    0x0f, 0x0f, 0x0f, 0x0f,
+    0x0f, 0x06, 0x16, 0x26,
+};
+
 void game_startup(void) {
     hw_init();
 
     for (;;) {
 	wipe_screen();
-	draw_screen(title_data);
 	attr_screen(title_attr);
+	draw_screen(title_data);
 	animate_title_text();
+	wait_start_button();
 
+	wipe_screen();
+	setup_palette(alley_palette, 0, 16);
+	attr_screen(alley_attr);
+	draw_screen(alley_data);
 	wait_start_button();
     }
 }
