@@ -10,6 +10,7 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_counter:		.ds 1");
+    __asm__("_buttons:		.ds 1");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -73,17 +74,20 @@ void rst(void) __naked {
 #define DMCFREQ(x)	MEM_WR(0x4010, x)
 #define OAMDMA(x)	MEM_WR(0x4014, x)
 #define SND_CHN(x)	MEM_WR(0x4015, x)
-#define JOY1(x)		MEM_WR(0x4016, x)
+#define JOY1_WR(x)	MEM_WR(0x4016, x)
+#define JOY1_RD()	MEM_RD(0x4016)
 #define JOY2(x)		MEM_WR(0x4017, x)
 
-#define BUTTON_A	BIT(0)
-#define BUTTON_B	BIT(1)
-#define BUTTON_SELECT	BIT(2)
-#define BUTTON_START	BIT(3)
-#define BUTTON_UP	BIT(4)
-#define BUTTON_DOWN	BIT(5)
-#define BUTTON_LEFT	BIT(6)
-#define BUTTON_RIGHT	BIT(7)
+#define BUTTON_A	BIT(7)
+#define BUTTON_B	BIT(6)
+#define BUTTON_SELECT	BIT(5)
+#define BUTTON_START	BIT(4)
+#define BUTTON_UP	BIT(3)
+#define BUTTON_DOWN	BIT(2)
+#define BUTTON_LEFT	BIT(1)
+#define BUTTON_RIGHT	BIT(0)
+
+extern byte oam[256];
 
 extern volatile word ppu_addr;
 extern volatile byte ppu_count;
@@ -91,8 +95,24 @@ extern volatile byte ppu_buffer[32];
 
 extern volatile byte counter;
 
+extern byte buttons;
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
+}
+
+static byte check_button(void) {
+    JOY1_WR(0x00);
+    JOY1_WR(0x01);
+
+    byte press, state = 0;
+    for (byte i = 0; i < 8; i++) {
+	state = state << 1;
+	state |= JOY1_RD() & 1;
+    }
+    press = (buttons ^ state) & state;
+    buttons = state;
+    return press;
 }
 
 static void clear_palette(void) {
@@ -103,10 +123,9 @@ static void clear_palette(void) {
     }
 }
 
-extern byte oam[256];
-
 static void init_memory(void) {
     byte i = 0;
+    buttons = 0;
     counter = 0;
     ppu_count = 0;
     do { oam[i++] = 255; } while (i != 0);
@@ -276,12 +295,14 @@ static void animate_title_text(void) {
 void game_startup(void) {
     hw_init();
 
+  repeat:
     wipe_screen();
     draw_screen(title_data);
     attr_screen(title_attr);
     animate_title_text();
 
-    for (;;) { }
+    while (!(check_button() & BUTTON_START)) { }
+    goto repeat;
 }
 
 /* must be very last */
