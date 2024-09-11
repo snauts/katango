@@ -99,11 +99,11 @@ static void clear_palette(void) {
 
 extern byte oam[256];
 
-static void init_oam_data(void) {
+static void init_memory(void) {
     byte i = 0;
-    do {
-	oam[i++] = 255;
-    } while (i != 0);
+    counter = 0;
+    ppu_count = 0;
+    do { oam[i++] = 255; } while (i != 0);
 }
 
 static void ppu_ctrl(void) {
@@ -120,7 +120,7 @@ static void hw_init(void) {
     SND_CHN(0x0f);
 
     wait_vblank();
-    init_oam_data();
+    init_memory();
     wait_vblank();
     clear_palette();
     wait_vblank();
