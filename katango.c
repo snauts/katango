@@ -76,6 +76,15 @@ void rst(void) __naked {
 #define JOY1(x)		MEM_WR(0x4016, x)
 #define JOY2(x)		MEM_WR(0x4017, x)
 
+#define BUTTON_A	BIT(0)
+#define BUTTON_B	BIT(1)
+#define BUTTON_SELECT	BIT(2)
+#define BUTTON_START	BIT(3)
+#define BUTTON_UP	BIT(4)
+#define BUTTON_DOWN	BIT(5)
+#define BUTTON_LEFT	BIT(6)
+#define BUTTON_RIGHT	BIT(7)
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
 }
