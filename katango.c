@@ -327,7 +327,14 @@ static const byte alley_palette[] = {
     0x0f, 0x07, 0x17, 0x09,
     0x0f, 0x00, 0x10, 0x20,
     0x0f, 0x06, 0x16, 0x26,
+
+    0x0f, 0x0f, 0x0c, 0x38,
+    0x0f, 0x0c, 0x1c, 0x2c,
 };
+
+static void setup_alley_palette(void) {
+    setup_palette(alley_palette, 0, sizeof(alley_palette));
+}
 
 static const byte cat_pos[] = {
     24, 56, 88, 120, 152, 184, 216
@@ -429,11 +436,9 @@ void game_startup(void) {
 	wait_start_button();
 
 	wipe_screen();
-	setup_palette(alley_palette, 0, 16);
+	setup_alley_palette();
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
-	update_palette(18, 0x0c);
-	update_palette(19, 0x38);
 	start_game_loop();
     }
 }
