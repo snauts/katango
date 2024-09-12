@@ -9,6 +9,7 @@ run: build
 build:
 	gcc pcx-dump.c -o pcx-dump.bin
 	./pcx-dump.bin -r tiles.chr
+	./pcx-dump.bin -t fonts.pcx
 	./pcx-dump.bin -t title.pcx
 	./pcx-dump.bin -t alley.pcx
 	./pcx-dump.bin -p tiles.chr
