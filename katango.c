@@ -90,6 +90,9 @@ void rst(void) __naked {
 #define BUTTON_LEFT	BIT(1)
 #define BUTTON_RIGHT	BIT(0)
 
+#define CAT_RIGHT	(BUTTON_RIGHT | BUTTON_A)
+#define CAT_LEFT	(BUTTON_LEFT  | BUTTON_B)
+
 extern byte oam[256];
 
 extern volatile word ppu_addr;
@@ -331,7 +334,7 @@ static const byte cat_pos[] = {
 };
 
 static const byte cat_x[] = {
-    0, 8, 0, 8, 0, 8
+    0, 8, 0, 8, 0, 8, 0
 };
 
 static const byte cat_y[] = {
@@ -342,14 +345,33 @@ static const byte cat_s[] = {
     0, 1, 16, 17, 32, 33,
 };
 
+static void move_cat(void) {
+    byte button = check_button();
+    if (position < 6 && (button & CAT_RIGHT)) {
+	direction = 0;
+	position++;
+    }
+    if (position > 0 && (button & CAT_LEFT)) {
+	direction = 1;
+	position--;
+    }
+}
+
 static void place_cat(void) {
     byte i = 0;
     byte x = cat_pos[position];
     for (byte n = 0; n < 6; n++) {
 	oam[i++] = 192 + cat_y[n];
 	oam[i++] = cat_s[n];
-	oam[i++] = 0;
-	oam[i++] = x + cat_x[n];
+	oam[i++] = direction ? BIT(6) : 0;
+	oam[i++] = x + cat_x[n + direction];
+    }
+}
+
+static void start_game_loop(void) {
+    for (;;) {
+	move_cat();
+	place_cat();
     }
 }
 
@@ -368,8 +390,7 @@ void game_startup(void) {
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
 	update_palette(19, 0x38);
-	place_cat();
-	wait_start_button();
+	start_game_loop();
     }
 }
 
