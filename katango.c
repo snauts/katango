@@ -350,10 +350,9 @@ static const byte cat_img[] = {
 };
 
 static byte wind_state;
-static void add_wind(void) {
+static void add_wind(byte side) {
     byte i = 24;
-    byte offset = cat_pos[position];
-    offset += direction ? 24 : 240;
+    byte offset = cat_pos[position] + side;
     for (byte n = 0; n < 6; n += 2) {
 	oam[i++] = cat_y[n];
 	oam[i++] = cat_s[n] + 8;
@@ -367,11 +366,11 @@ static void add_wind(void) {
     NOISE_LO(0x00);
 }
 
+static byte wind_direction;
 static void move_wind(void) {
     if (oam[24] != 255) {
-	byte move = direction ? 254 : 2;
 	for (byte n = 27; n < 36; n += 4) {
-	    oam[n] += move;
+	    oam[n] += wind_direction;
 	}
 	if (--wind_state == 0) {
 	    for (byte n = 24; n < 36; n += 4) {
@@ -384,25 +383,27 @@ static void move_wind(void) {
 static void move_cat(void) {
     byte button = check_button();
     if (position < 6 && (button & CAT_RIGHT)) {
-	direction = 0;
 	position++;
-	add_wind();
+	direction = 0;
+	wind_direction = 2;
+	add_wind(240);
     }
     if (position > 0 && (button & CAT_LEFT)) {
-	direction = BIT(6);
 	position--;
-	add_wind();
+	direction = BIT(6);
+	wind_direction = 254;
+	add_wind(24);
     }
 }
 
 static void place_cat(void) {
     byte i = 0;
     byte x = cat_pos[position];
-    byte sprite_idx = cat_img[position];
+    byte s = cat_img[position];
     byte offset = direction ? 1 : 0;
     for (byte n = 0; n < 6; n++) {
 	oam[i++] = cat_y[n];
-	oam[i++] = cat_s[n] + sprite_idx;
+	oam[i++] = cat_s[n] + s;
 	oam[i++] = direction;
 	oam[i++] = x + cat_x[n + offset];
     }
@@ -410,9 +411,9 @@ static void place_cat(void) {
 
 static void start_game_loop(void) {
     for (;;) {
+	move_wind();
 	move_cat();
 	place_cat();
-	move_wind();
 	wait_vblank();
     }
 }
