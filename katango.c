@@ -352,7 +352,6 @@ static const byte cat_img[] = {
 static byte wind_state;
 static void add_wind(void) {
     byte i = 24;
-    byte attribute;
     byte offset = cat_pos[position];
     offset += direction ? 24 : 240;
     for (byte n = 0; n < 6; n += 2) {
