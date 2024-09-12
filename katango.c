@@ -11,6 +11,8 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_counter:		.ds 1");
     __asm__("_buttons:		.ds 1");
+    __asm__("_position:		.ds 1");
+    __asm__("_direction:	.ds 1");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -97,6 +99,8 @@ extern volatile byte ppu_buffer[32];
 extern volatile byte counter;
 
 extern byte buttons;
+extern byte position;
+extern byte direction;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -132,6 +136,8 @@ static void init_memory(void) {
     byte i = 0;
     buttons = 0;
     counter = 0;
+    position = 3;
+    direction = 0;
     ppu_count = 0;
     do { oam[i++] = 255; } while (i != 0);
 }
@@ -320,6 +326,33 @@ static const byte alley_palette[] = {
     0x0f, 0x06, 0x16, 0x26,
 };
 
+static const byte cat_pos[] = {
+    24, 56, 88, 120, 152, 184, 216
+};
+
+static const byte cat_x[] = {
+    0, 8, 0, 8, 0, 8
+};
+
+static const byte cat_y[] = {
+    0, 0, 8, 8, 16, 16
+};
+
+static const byte cat_s[] = {
+    0, 1, 16, 17, 32, 33,
+};
+
+static void place_cat(void) {
+    byte i = 0;
+    byte x = cat_pos[position];
+    for (byte n = 0; n < 6; n++) {
+	oam[i++] = 192 + cat_y[n];
+	oam[i++] = cat_s[n];
+	oam[i++] = 0;
+	oam[i++] = x + cat_x[n];
+    }
+}
+
 void game_startup(void) {
     hw_init();
 
@@ -334,6 +367,8 @@ void game_startup(void) {
 	setup_palette(alley_palette, 0, 16);
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
+	update_palette(19, 0x38);
+	place_cat();
 	wait_start_button();
     }
 }
