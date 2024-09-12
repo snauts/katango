@@ -338,7 +338,7 @@ static const byte cat_x[] = {
 };
 
 static const byte cat_y[] = {
-    0, 0, 8, 8, 16, 16
+    192, 192, 200, 200, 208, 208
 };
 
 static const byte cat_s[] = {
@@ -349,28 +349,63 @@ static const byte cat_img[] = {
     6, 4, 2, 0, 2, 4, 6,
 };
 
+static byte wind_state;
+static void add_wind(void) {
+    byte i = 24;
+    byte attribute;
+    byte offset = cat_pos[position];
+    offset += direction ? 24 : 240;
+    for (byte n = 0; n < 6; n += 2) {
+	oam[i++] = cat_y[n];
+	oam[i++] = cat_s[n] + 8;
+	oam[i++] = direction;
+	oam[i++] = offset;
+    }
+    wind_state = 8;
+
+    NOISE_VL(0x14);
+    NOISE_HI(0x00);
+    NOISE_LO(0x00);
+}
+
+static void move_wind(void) {
+    if (oam[24] != 255) {
+	byte move = direction ? 254 : 2;
+	for (byte n = 27; n < 36; n += 4) {
+	    oam[n] += move;
+	}
+	if (--wind_state == 0) {
+	    for (byte n = 24; n < 36; n += 4) {
+		oam[n] = 255;
+	    }
+	}
+    }
+}
+
 static void move_cat(void) {
     byte button = check_button();
     if (position < 6 && (button & CAT_RIGHT)) {
 	direction = 0;
 	position++;
+	add_wind();
     }
     if (position > 0 && (button & CAT_LEFT)) {
-	direction = 1;
+	direction = BIT(6);
 	position--;
+	add_wind();
     }
 }
 
 static void place_cat(void) {
     byte i = 0;
     byte x = cat_pos[position];
-    byte img = cat_img[position];
-    byte dir = direction ? BIT(6) : 0;
+    byte sprite_idx = cat_img[position];
+    byte offset = direction ? 1 : 0;
     for (byte n = 0; n < 6; n++) {
-	oam[i++] = 192 + cat_y[n];
-	oam[i++] = cat_s[n] + img;
-	oam[i++] = dir;
-	oam[i++] = x + cat_x[n + direction];
+	oam[i++] = cat_y[n];
+	oam[i++] = cat_s[n] + sprite_idx;
+	oam[i++] = direction;
+	oam[i++] = x + cat_x[n + offset];
     }
 }
 
@@ -378,6 +413,8 @@ static void start_game_loop(void) {
     for (;;) {
 	move_cat();
 	place_cat();
+	move_wind();
+	wait_vblank();
     }
 }
 
@@ -395,6 +432,7 @@ void game_startup(void) {
 	setup_palette(alley_palette, 0, 16);
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
+	update_palette(18, 0x0c);
 	update_palette(19, 0x38);
 	start_game_loop();
     }
