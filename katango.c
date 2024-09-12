@@ -345,6 +345,10 @@ static const byte cat_s[] = {
     0, 1, 16, 17, 32, 33,
 };
 
+static const byte cat_img[] = {
+    6, 4, 2, 0, 2, 4, 6,
+};
+
 static void move_cat(void) {
     byte button = check_button();
     if (position < 6 && (button & CAT_RIGHT)) {
@@ -360,10 +364,12 @@ static void move_cat(void) {
 static void place_cat(void) {
     byte i = 0;
     byte x = cat_pos[position];
+    byte img = cat_img[position];
+    byte dir = direction ? BIT(6) : 0;
     for (byte n = 0; n < 6; n++) {
 	oam[i++] = 192 + cat_y[n];
-	oam[i++] = cat_s[n];
-	oam[i++] = direction ? BIT(6) : 0;
+	oam[i++] = cat_s[n] + img;
+	oam[i++] = dir;
 	oam[i++] = x + cat_x[n + direction];
     }
 }
