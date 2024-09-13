@@ -397,16 +397,16 @@ static void move_wind(void) {
 static void move_cat(void) {
     byte button = check_button();
     if (position < 6 && (button & CAT_RIGHT)) {
-	position++;
 	direction = 0;
-	wind_direction = 2;
-	add_wind(240);
+	wind_direction = 3;
+	add_wind(8);
+	position++;
     }
     if (position > 0 && (button & CAT_LEFT)) {
-	position--;
 	direction = BIT(6);
-	wind_direction = 254;
-	add_wind(24);
+	wind_direction = 253;
+	add_wind(0);
+	position--;
     }
 }
 
