@@ -9,6 +9,7 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_addr:		.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
+    __asm__("_heights:		.ds 7");
     __asm__("_counter:		.ds 1");
     __asm__("_buttons:		.ds 1");
     __asm__("_position:		.ds 1");
@@ -104,6 +105,7 @@ extern volatile byte counter;
 extern byte buttons;
 extern byte position;
 extern byte direction;
+extern byte heights[7];
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -143,6 +145,10 @@ static void init_memory(void) {
     direction = 0;
     ppu_count = 0;
     do { oam[i++] = 255; } while (i != 0);
+
+    for (byte n = 0; n < 7; n++) {
+	heights[n] = 208;
+    }
 }
 
 static void ppu_ctrl(void) {
@@ -345,7 +351,7 @@ static const byte cat_x[] = {
 };
 
 static const byte cat_y[] = {
-    192, 192, 200, 200, 208, 208
+    16, 16, 8, 8, 0, 0
 };
 
 static const byte cat_s[] = {
@@ -359,9 +365,10 @@ static const byte cat_img[] = {
 static byte wind_state;
 static void add_wind(byte side) {
     byte i = 24;
+    byte h = heights[position];
     byte offset = cat_pos[position] + side;
     for (byte n = 0; n < 6; n += 2) {
-	oam[i++] = cat_y[n];
+	oam[i++] = h - cat_y[n];
 	oam[i++] = cat_s[n] + 8;
 	oam[i++] = direction;
 	oam[i++] = offset;
@@ -405,11 +412,12 @@ static void move_cat(void) {
 
 static void place_cat(void) {
     byte i = 0;
+    byte h = heights[position];
     byte x = cat_pos[position];
     byte s = cat_img[position];
     byte offset = direction ? 1 : 0;
     for (byte n = 0; n < 6; n++) {
-	oam[i++] = cat_y[n];
+	oam[i++] = h - cat_y[n];
 	oam[i++] = cat_s[n] + s;
 	oam[i++] = direction;
 	oam[i++] = x + cat_x[n + offset];
