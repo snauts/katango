@@ -626,12 +626,16 @@ static void move_fish(void) {
     }
 }
 
-static void update_score(void) {
-    ppu_addr = 0x2021;
-    ppu_count = 27; /* symbols in top message */
+static void score_to_buffer(byte offset) {
     for (byte i = 0; i < 5; i++) {
-	ppu_buffer[6 + i] = digit_to_tile(score[i]);
+	ppu_buffer[offset + i] = digit_to_tile(score[i]);
     }
+}
+
+static void update_score(void) {
+    score_to_buffer(6);
+    ppu_addr = 0x2021;
+    ppu_count = 27;
 }
 
 static void game_over(void) {
@@ -641,6 +645,10 @@ static void game_over(void) {
     setup_palette(game_over_palette, 0, sizeof(game_over_palette));
 
     print_msg("GAME OVER", 12, 12);
+
+    score_to_buffer(0);
+    ppu_addr = 0x21ee;
+    ppu_update(5);
 
     wait_start_button();
 }
