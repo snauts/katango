@@ -76,6 +76,10 @@ void rst(void) __naked {
 #define PPUADDR(x)	MEM_WR(0x2006, x)
 #define PPUDATA(x)	MEM_WR(0x2007, x)
 
+#define TRI_CR(x)	MEM_WR(0x4008, x)
+#define TRI_LO(x)	MEM_WR(0x400A, x)
+#define TRI_HI(x)	MEM_WR(0x400B, x)
+
 #define NOISE_VL(x)	MEM_WR(0x400C, x)
 #define NOISE_LO(x)	MEM_WR(0x400E, x)
 #define NOISE_HI(x)	MEM_WR(0x400F, x)
@@ -545,6 +549,9 @@ static void loose_live(void) {
 	ppu_buffer[17 + lives] = 0;
     }
     lives--;
+    TRI_CR(0x0f);
+    TRI_LO(0x0f);
+    TRI_HI(0x10);
 }
 
 static void animate_drop(byte index) {
