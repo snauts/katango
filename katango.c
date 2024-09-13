@@ -97,7 +97,9 @@ void rst(void) __naked {
 #define CAT_RIGHT	(BUTTON_RIGHT | BUTTON_A)
 #define CAT_LEFT	(BUTTON_LEFT  | BUTTON_B)
 
-#define FISH_START	128
+#define FISH_SPRITES	128
+#define WIND_SPRITES	244
+#define CAT_SPRITES	220
 
 extern byte oam[256];
 
@@ -114,6 +116,9 @@ extern byte distance;
 extern byte position;
 extern byte direction;
 extern byte height_map[7];
+
+static byte fish_free;
+static byte fish_dir;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -164,6 +169,9 @@ static void init_memory(void) {
 
     memset(oam, 255, 0x100);
     memset(height_map, 208, 7);
+
+    fish_free = 0;
+    fish_dir = 0;
 
     update_cat();
 }
@@ -419,7 +427,7 @@ static byte wind_frame;
 static byte wind_x_dir;
 static byte wind_y_dir;
 static void add_wind(byte side) {
-    byte i = 24;
+    byte i = WIND_SPRITES;
     byte offset = distance + side;
     for (byte n = 0; n < 6; n += 2) {
 	oam[i++] = height - cat_y[n];
@@ -435,13 +443,13 @@ static void add_wind(byte side) {
 }
 
 static void move_wind(void) {
-    if (oam[24] != 255) {
-	for (byte n = 24; n < 36; n += 4) {
+    if (oam[WIND_SPRITES] != 255) {
+	for (byte n = WIND_SPRITES; n != 0; n += 4) {
 	    oam[n + 0] += wind_y_dir;
 	    oam[n + 3] += wind_x_dir;
 	}
 	if (++wind_frame == 8) {
-	    for (byte n = 24; n < 36; n += 4) {
+	    for (byte n = WIND_SPRITES; n != 0; n += 4) {
 		oam[n] = 255;
 	    }
 	}
@@ -480,7 +488,7 @@ static void move_cat(void) {
 }
 
 static void place_cat(void) {
-    byte i = 0;
+    byte i = CAT_SPRITES;
     byte s = cat_img[position];
     byte offset = direction ? 1 : 0;
     for (byte n = 0; n < 6; n++) {
@@ -491,14 +499,14 @@ static void place_cat(void) {
     }
 }
 
-static byte free_fish;
 static void emit_fish(byte pos) {
-    if (free_fish) {
-	oam[free_fish + 0] = 0;
-	oam[free_fish + 1] = 48;
-	oam[free_fish + 2] = 1;
-	oam[free_fish + 3] = cat_pos[pos] + 4;
-	free_fish = 0;
+    if (fish_free < FISH_SPRITES) {
+	oam[fish_free + 0] = 0;
+	oam[fish_free + 1] = 48;
+	oam[fish_free + 2] = fish_dir | 1;
+	oam[fish_free + 3] = cat_pos[pos] + 4;
+	fish_dir = fish_dir ^ BIT(6);
+	fish_free = FISH_SPRITES;
     }
 }
 
@@ -508,19 +516,36 @@ static void animate_fish(byte index) {
     oam[index] = sprite;
 }
 
+static void animate_drop(byte index) {
+    byte sprite = oam[index + 1];
+    if (sprite < 64) {
+	sprite = 64;
+    }
+    else if (sprite < 67) {
+	sprite++;
+    }
+    else {
+	oam[index] = 255;
+    }
+    oam[index + 1] = sprite;
+}
+
 static void move_fish(void) {
     byte animate = (counter & 3) == 0;
-    for (byte i = FISH_START; i != 0; i += 4) {
-	switch (oam[i]) {
-	case 255:
-	    free_fish = i;
-	    break;
-	case 208:
-	    oam[i] = 255;
-	    break;
-	default:
-	    oam[i]++;
-	    if (animate) animate_fish(i + 1);
+    for (byte i = 0; i < FISH_SPRITES; i += 4) {
+	if (oam[i] == 255) {
+	    fish_free = i;
+	}
+	else {
+	    byte index = oam[i + 3] >> 5;
+	    byte drop = height_map[index];
+	    if (oam[i] == drop) {
+		if (animate) animate_drop(i);
+	    }
+	    else {
+		oam[i]++;
+		if (animate) animate_fish(i + 1);
+	    }
 	}
     }
 }
