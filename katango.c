@@ -97,6 +97,8 @@ void rst(void) __naked {
 #define CAT_RIGHT	(BUTTON_RIGHT | BUTTON_A)
 #define CAT_LEFT	(BUTTON_LEFT  | BUTTON_B)
 
+#define FISH_START	128
+
 extern byte oam[256];
 
 extern volatile word ppu_addr;
@@ -489,12 +491,47 @@ static void place_cat(void) {
     }
 }
 
+static byte free_fish;
+static void emit_fish(byte pos) {
+    if (free_fish) {
+	oam[free_fish + 0] = 0;
+	oam[free_fish + 1] = 48;
+	oam[free_fish + 2] = 1;
+	oam[free_fish + 3] = cat_pos[pos] + 4;
+	free_fish = 0;
+    }
+}
+
+static void animate_fish(byte index) {
+    byte sprite = oam[index];
+    sprite = sprite < 55 ? sprite + 1 : 48;
+    oam[index] = sprite;
+}
+
+static void move_fish(void) {
+    byte animate = (counter & 3) == 0;
+    for (byte i = FISH_START; i != 0; i += 4) {
+	switch (oam[i]) {
+	case 255:
+	    free_fish = i;
+	    break;
+	case 208:
+	    oam[i] = 255;
+	    break;
+	default:
+	    oam[i]++;
+	    if (animate) animate_fish(i + 1);
+	}
+    }
+}
+
 static void start_game_loop(void) {
     for (;;) {
 	wait_vblank();
 	move_wind();
 	move_cat();
 	place_cat();
+	move_fish();
 	check_vblank();
     }
 }
