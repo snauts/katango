@@ -117,8 +117,14 @@ extern byte position;
 extern byte direction;
 extern byte height_map[7];
 
+static byte wind_frame;
+static byte wind_x_dir;
+static byte wind_y_dir;
+
 static byte fish_free;
 static byte fish_dir;
+static byte fish_left;
+static byte fish_done;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -424,9 +430,6 @@ static const byte cat_img[] = {
     6, 4, 2, 0, 2, 4, 6,
 };
 
-static byte wind_frame;
-static byte wind_x_dir;
-static byte wind_y_dir;
 static void add_wind(byte side) {
     byte i = WIND_SPRITES;
     byte offset = distance + side;
@@ -545,6 +548,12 @@ static void move_fish(void) {
 	if (oam[i] == 255) {
 	    fish_free = i;
 	}
+	else if (oam[i + 1] >= 68) {
+	    if (--fish_left == 0) {
+		fish_done = 255;
+		oam[i] = 255;
+	    }
+	}
 	else {
 	    byte index = oam[i + 3] >> 5;
 	    byte range = height_map[index] - oam[i];
@@ -555,6 +564,11 @@ static void move_fish(void) {
 	    else if (index == position && range < 16) {
 		oam[i + 1] = fish_bonus[range];
 		oam[i + 2] = 2;
+		if (fish_done != 255) {
+		    oam[fish_done] = 255;
+		}
+		fish_left = 25;
+		fish_done = i;
 	    }
 	    else {
 		oam[i]++;
