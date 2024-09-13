@@ -579,6 +579,17 @@ static void fish_expire(byte i) {
     }
 }
 
+static void inc_score(byte amount) {
+    for (byte i = 4; i != 255; i--) {
+	score[i] += amount;
+	if (score[i] >= 10) {
+	    score[i] -= 10;
+	    amount = 1;
+	}
+	else break;
+    }
+}
+
 static const byte fish_score[] = {
     0, 1, 1, 1, 2, 2, 3, 3, 5, 3, 3, 2, 2, 1, 1, 1
 };
@@ -605,6 +616,7 @@ static void move_fish(void) {
 	    }
 	    else if (index == position && range < 16) {
 		catch_fish(i, fish_bonus[range]);
+		inc_score(fish_score[range]);
 	    }
 	    else {
 		if (animate) animate_fish(i + 1);
