@@ -397,6 +397,7 @@ static const byte alley_palette[] = {
 
     0x0f, 0x0f, 0x0c, 0x38,
     0x0f, 0x12, 0x1c, 0x21,
+    0x0f, 0x12, 0x13, 0x24,
 };
 
 static void setup_alley_palette(void) {
@@ -530,6 +531,14 @@ static void animate_drop(byte index) {
     oam[index + 1] = sprite;
 }
 
+static const byte fish_score[] = {
+    0, 1, 1, 1, 2, 2, 3, 3, 5, 3, 3, 2, 2, 1, 1, 1
+};
+
+static const byte fish_bonus[] = {
+    0, 71, 71, 71, 70, 70, 69, 69, 68, 69, 69, 70, 70, 71, 71, 71
+};
+
 static void move_fish(void) {
     byte animate = (counter & 3) == 0;
     for (byte i = 0; i < FISH_SPRITES; i += 4) {
@@ -538,9 +547,14 @@ static void move_fish(void) {
 	}
 	else {
 	    byte index = oam[i + 3] >> 5;
-	    byte drop = height_map[index];
-	    if (oam[i] == drop) {
+	    byte range = height_map[index] - oam[i];
+
+	    if (range == 0) {
 		if (animate) animate_drop(i);
+	    }
+	    else if (index == position && range < 16) {
+		oam[i + 1] = fish_bonus[range];
+		oam[i + 2] = 2;
 	    }
 	    else {
 		oam[i]++;
