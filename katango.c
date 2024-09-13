@@ -445,8 +445,15 @@ static void move_wind(void) {
 }
 
 static void update_cat(void) {
-    wind_y_dir = 0;
+    byte prev = height;
     height = height_map[position];
+
+    if (height >= prev) {
+	wind_y_dir = (height - prev) >> 3;
+    }
+    else {
+	wind_y_dir = 0 - ((prev - height) >> 3);
+    }
 }
 
 static void move_cat(void) {
