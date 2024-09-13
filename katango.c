@@ -9,11 +9,13 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_addr:		.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
-    __asm__("_heights:		.ds 7");
+    __asm__("_height:		.ds 1");
+    __asm__("_signal:		.ds 1");
     __asm__("_counter:		.ds 1");
     __asm__("_buttons:		.ds 1");
     __asm__("_position:		.ds 1");
     __asm__("_direction:	.ds 1");
+    __asm__("_height_map:	.ds 7");
 
     __asm__(".area OAM (PAG)");
     __asm__("_oam:		.ds 256");
@@ -101,14 +103,17 @@ extern volatile byte ppu_count;
 extern volatile byte ppu_buffer[32];
 
 extern volatile byte counter;
+extern volatile byte signal;
 
+extern byte height;
 extern byte buttons;
 extern byte position;
 extern byte direction;
-extern byte heights[7];
+extern byte height_map[7];
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
+    signal = 0;
 }
 
 static byte check_button(void) {
@@ -129,6 +134,13 @@ static void wait_start_button(void) {
     while (!(check_button() & BUTTON_START)) { }
 }
 
+static void memset(void *buf, byte val, word count) {
+    byte *ptr = buf;
+    while (count-- > 0) {
+	*ptr++ = val;
+    }
+}
+
 static void clear_palette(void) {
     PPUADDR(0x3f);
     PPUADDR(0x00);
@@ -137,6 +149,7 @@ static void clear_palette(void) {
     }
 }
 
+static void update_cat(void);
 static void init_memory(void) {
     byte i = 0;
     buttons = 0;
@@ -144,11 +157,11 @@ static void init_memory(void) {
     position = 3;
     direction = 0;
     ppu_count = 0;
-    do { oam[i++] = 255; } while (i != 0);
 
-    for (byte n = 0; n < 7; n++) {
-	heights[n] = 208;
-    }
+    memset(oam, 255, 0x100);
+    memset(height_map, 208, 7);
+
+    update_cat();
 }
 
 static void ppu_ctrl(void) {
@@ -174,6 +187,7 @@ static void hw_init(void) {
 
 void irq_handler(void) {
     byte i;
+    signal = 1;
     PPUADDR(ppu_addr >> 8);
     PPUADDR(ppu_addr & 0xff);
     for (i = 0; i < ppu_count; i++) {
@@ -209,9 +223,7 @@ static void ppu_update(byte amount) {
 
 static void wipe_palette(void) {
     ppu_addr = 0x3f00;
-    for (byte i = 0; i < 32; i++) {
-	ppu_buffer[i] = 0xf;
-    }
+    memset(ppu_buffer, 0xf, 32);
     ppu_update(32);
 }
 
@@ -225,9 +237,7 @@ static void setup_palette(const byte *ptr, byte offset, byte amount) {
 
 static void wipe_screen(void) {
     ppu_addr = 0x2000;
-    for (byte i = 0; i < 32; i++) {
-	ppu_buffer[i] = 0;
-    }
+    memset(ppu_buffer, 0, 32);
     for (byte i = 0; i < 30; i++) {
 	ppu_update(32);
     }
@@ -362,31 +372,32 @@ static const byte cat_img[] = {
     6, 4, 2, 0, 2, 4, 6,
 };
 
-static byte wind_state;
+static byte wind_frame;
+static byte wind_x_dir;
+static byte wind_y_dir;
 static void add_wind(byte side) {
     byte i = 24;
-    byte h = heights[position];
     byte offset = cat_pos[position] + side;
     for (byte n = 0; n < 6; n += 2) {
-	oam[i++] = h - cat_y[n];
+	oam[i++] = height - cat_y[n];
 	oam[i++] = cat_s[n] + 8;
 	oam[i++] = direction;
 	oam[i++] = offset;
     }
-    wind_state = 8;
+    wind_frame = 0;
 
     NOISE_VL(0x14);
     NOISE_HI(0x00);
     NOISE_LO(0x00);
 }
 
-static byte wind_direction;
 static void move_wind(void) {
     if (oam[24] != 255) {
-	for (byte n = 27; n < 36; n += 4) {
-	    oam[n] += wind_direction;
+	for (byte n = 24; n < 36; n += 4) {
+	    oam[n + 0] += wind_y_dir;
+	    oam[n + 3] += wind_x_dir;
 	}
-	if (--wind_state == 0) {
+	if (++wind_frame == 8) {
 	    for (byte n = 24; n < 36; n += 4) {
 		oam[n] = 255;
 	    }
@@ -394,30 +405,36 @@ static void move_wind(void) {
     }
 }
 
+static void update_cat(void) {
+    wind_y_dir = 0;
+    height = height_map[position];
+}
+
 static void move_cat(void) {
     byte button = check_button();
     if (position < 6 && (button & CAT_RIGHT)) {
 	direction = 0;
-	wind_direction = 3;
+	wind_x_dir = 3;
 	add_wind(8);
 	position++;
+	update_cat();
     }
     if (position > 0 && (button & CAT_LEFT)) {
 	direction = BIT(6);
-	wind_direction = 253;
+	wind_x_dir = 253;
 	add_wind(0);
 	position--;
+	update_cat();
     }
 }
 
 static void place_cat(void) {
     byte i = 0;
-    byte h = heights[position];
     byte x = cat_pos[position];
     byte s = cat_img[position];
     byte offset = direction ? 1 : 0;
     for (byte n = 0; n < 6; n++) {
-	oam[i++] = h - cat_y[n];
+	oam[i++] = height - cat_y[n];
 	oam[i++] = cat_s[n] + s;
 	oam[i++] = direction;
 	oam[i++] = x + cat_x[n + offset];
@@ -426,10 +443,10 @@ static void place_cat(void) {
 
 static void start_game_loop(void) {
     for (;;) {
+	wait_vblank();
 	move_wind();
 	move_cat();
 	place_cat();
-	wait_vblank();
     }
 }
 
