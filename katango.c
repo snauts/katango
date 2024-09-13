@@ -614,8 +614,19 @@ static void update_score(void) {
     ppu_count = 26; /* symbols in top message */
 }
 
+static void game_over(void) {
+    wipe_screen();
+
+    static const byte game_over_palette[] = { 0x0f, 0x16, 0x26, 0x36 };
+    setup_palette(game_over_palette, 0, sizeof(game_over_palette));
+
+    print_msg("GAME OVER", 12, 12);
+
+    wait_start_button();
+}
+
 static void start_game_loop(void) {
-    while (lives != 255) {
+    while (lives <= 9) {
 	wait_vblank();
 	move_wind();
 	move_cat();
@@ -624,6 +635,7 @@ static void start_game_loop(void) {
 	update_score();
 	check_vblank();
     }
+    game_over();
 }
 
 static void print_score_n_lives(void) {
