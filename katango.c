@@ -9,6 +9,8 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_addr:		.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
+    __asm__("_score:		.ds 1");
+    __asm__("_lives:		.ds 1");
     __asm__("_height:		.ds 1");
     __asm__("_signal:		.ds 1");
     __asm__("_counter:		.ds 1");
@@ -110,6 +112,8 @@ extern volatile byte ppu_buffer[32];
 extern volatile byte counter;
 extern volatile byte signal;
 
+extern byte score;
+extern byte lives;
 extern byte height;
 extern byte buttons;
 extern byte distance;
@@ -164,22 +168,32 @@ static void clear_palette(void) {
     }
 }
 
-static void update_cat(void);
 static void init_memory(void) {
-    byte i = 0;
     buttons = 0;
     counter = 0;
-    position = 3;
-    direction = 0;
     ppu_count = 0;
 
     memset(oam, 255, 0x100);
-    memset(height_map, 208, 7);
+}
+
+static void update_cat(void);
+static void reset_level(void) {
+    position = 3;
+    direction = 0;
 
     fish_free = 0;
     fish_dir = 0;
 
     update_cat();
+}
+
+static void reset_game_state(void) {
+    score = 0;
+    lives = 9;
+
+    memset(height_map, 208, 7);
+
+    reset_level();
 }
 
 static void ppu_ctrl(void) {
@@ -255,6 +269,7 @@ static void setup_palette(const byte *ptr, byte offset, byte amount) {
 
 static void wipe_screen(void) {
     ppu_addr = 0x2000;
+    memset(oam, 255, 0x100);
     memset(ppu_buffer, 0, 32);
     for (byte i = 0; i < 30; i++) {
 	ppu_update(32);
@@ -520,10 +535,18 @@ static void animate_fish(byte index) {
     oam[index] = sprite;
 }
 
+static void loose_live(void) {
+    if (lives > 0) {
+	ppu_buffer[16 + lives] = 0;
+    }
+    lives--;
+}
+
 static void animate_drop(byte index) {
     byte sprite = oam[index + 1];
     if (sprite < 64) {
 	sprite = 64;
+	loose_live();
     }
     else if (sprite < 67) {
 	sprite++;
@@ -586,15 +609,25 @@ static void move_fish(void) {
     }
 }
 
+static void update_score(void) {
+    ppu_addr = 0x2021;
+    ppu_count = 26; /* symbols in top message */
+}
+
 static void start_game_loop(void) {
-    for (;;) {
+    while (lives != 255) {
 	wait_vblank();
 	move_wind();
 	move_cat();
 	place_cat();
 	move_fish();
+	update_score();
 	check_vblank();
     }
+}
+
+static void print_score_n_lives(void) {
+    print_msg("SCORE:0000 LIVES:@@@@@@@@@", 1, 0);
 }
 
 void game_startup(void) {
@@ -607,10 +640,13 @@ void game_startup(void) {
 	animate_title_text();
 	wait_start_button();
 
+	reset_game_state();
+
 	wipe_screen();
 	setup_alley_palette();
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
+	print_score_n_lives();
 	start_game_loop();
     }
 }
