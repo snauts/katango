@@ -271,7 +271,7 @@ static void wipe_screen(void) {
     ppu_addr = 0x2000;
     memset(oam, 255, 0x100);
     memset(ppu_buffer, 0, 32);
-    for (byte i = 0; i < 30; i++) {
+    for (byte i = 0; i < 32; i++) {
 	ppu_update(32);
     }
     wipe_palette();
