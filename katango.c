@@ -9,7 +9,7 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_addr:		.ds 2");
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
-    __asm__("_score:		.ds 1");
+    __asm__("_score:		.ds 5");
     __asm__("_lives:		.ds 1");
     __asm__("_height:		.ds 1");
     __asm__("_signal:		.ds 1");
@@ -112,7 +112,8 @@ extern volatile byte ppu_buffer[32];
 extern volatile byte counter;
 extern volatile byte signal;
 
-extern byte score;
+extern byte score[5];
+
 extern byte lives;
 extern byte height;
 extern byte buttons;
@@ -188,7 +189,7 @@ static void reset_level(void) {
 }
 
 static void reset_game_state(void) {
-    score = 0;
+    memset(score, 0, 5);
     lives = 9;
 
     memset(height_map, 208, 7);
@@ -278,6 +279,10 @@ static void wipe_screen(void) {
 }
 
 static const char special[] = " @:"; /* @ is heart symbol */
+static byte digit_to_tile(byte c) {
+    return sizeof(special) + c - 1;
+}
+
 static byte char_to_tile(char c) {
     byte sym;
     for (sym = 0; sym < sizeof(special) - 1; sym++) {
@@ -537,7 +542,7 @@ static void animate_fish(byte index) {
 
 static void loose_live(void) {
     if (lives > 0) {
-	ppu_buffer[16 + lives] = 0;
+	ppu_buffer[17 + lives] = 0;
     }
     lives--;
 }
@@ -611,7 +616,10 @@ static void move_fish(void) {
 
 static void update_score(void) {
     ppu_addr = 0x2021;
-    ppu_count = 26; /* symbols in top message */
+    ppu_count = 27; /* symbols in top message */
+    for (byte i = 0; i < 5; i++) {
+	ppu_buffer[6 + i] = digit_to_tile(score[i]);
+    }
 }
 
 static void game_over(void) {
@@ -639,7 +647,7 @@ static void start_game_loop(void) {
 }
 
 static void print_score_n_lives(void) {
-    print_msg("SCORE:0000 LIVES:@@@@@@@@@", 1, 0);
+    print_msg("SCORE:00000 LIVES:@@@@@@@@@", 1, 0);
 }
 
 void game_startup(void) {
