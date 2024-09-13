@@ -534,6 +534,23 @@ static void animate_drop(byte index) {
     oam[index + 1] = sprite;
 }
 
+static void catch_fish(byte i, byte s) {
+    if (fish_done != 255) {
+	oam[fish_done] = 255;
+    }
+    fish_left = 25;
+    fish_done = i;
+    oam[i + 1] = s;
+    oam[i + 2] = 2;
+}
+
+static void fish_expire(byte i) {
+    if (--fish_left == 0) {
+	fish_done = 255;
+	oam[i] = 255;
+    }
+}
+
 static const byte fish_score[] = {
     0, 1, 1, 1, 2, 2, 3, 3, 5, 3, 3, 2, 2, 1, 1, 1
 };
@@ -549,10 +566,7 @@ static void move_fish(void) {
 	    fish_free = i;
 	}
 	else if (oam[i + 1] >= 68) {
-	    if (--fish_left == 0) {
-		fish_done = 255;
-		oam[i] = 255;
-	    }
+	    fish_expire(i);
 	}
 	else {
 	    byte index = oam[i + 3] >> 5;
@@ -562,17 +576,11 @@ static void move_fish(void) {
 		if (animate) animate_drop(i);
 	    }
 	    else if (index == position && range < 16) {
-		oam[i + 1] = fish_bonus[range];
-		oam[i + 2] = 2;
-		if (fish_done != 255) {
-		    oam[fish_done] = 255;
-		}
-		fish_left = 25;
-		fish_done = i;
+		catch_fish(i, fish_bonus[range]);
 	    }
 	    else {
-		oam[i]++;
 		if (animate) animate_fish(i + 1);
+		oam[i]++;
 	    }
 	}
     }
