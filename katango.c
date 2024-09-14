@@ -134,6 +134,7 @@ static byte fish_free;
 static byte fish_dir;
 static byte fish_left;
 static byte fish_done;
+static byte fish_snd;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -188,6 +189,7 @@ static void reset_level(void) {
 
     fish_free = 0;
     fish_dir = 0;
+    fish_snd = 16;
 
     update_cat();
 }
@@ -544,21 +546,33 @@ static void animate_fish(byte index) {
     oam[index] = sprite;
 }
 
-static void loose_live(void) {
+static void sound_sfx(void) {
+    if (fish_snd < 16) {
+	static const byte sfx[] = {
+	    0x10, 0x10, 0x10, 0x11,
+	    0x20, 0x10, 0x20, 0x11,
+	    0x40, 0x10, 0x40, 0x11,
+	    0x80, 0x10, 0x80, 0x11,
+	};
+	TRI_CR(0x0f);
+	TRI_LO(sfx[fish_snd++]);
+	TRI_HI(sfx[fish_snd++]);
+    }
+}
+
+static void lose_live(void) {
     if (lives > 0) {
 	ppu_buffer[17 + lives] = 0;
     }
+    fish_snd = 0;
     lives--;
-    TRI_CR(0x0f);
-    TRI_LO(0x0f);
-    TRI_HI(0x10);
 }
 
 static void animate_drop(byte index) {
     byte sprite = oam[index + 1];
     if (sprite < 64) {
 	sprite = 64;
-	loose_live();
+	lose_live();
     }
     else if (sprite < 67) {
 	sprite++;
@@ -667,6 +681,7 @@ static void start_game_loop(void) {
 	move_cat();
 	place_cat();
 	move_fish();
+	sound_sfx();
 	update_score();
 	check_vblank();
     }
