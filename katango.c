@@ -249,8 +249,8 @@ static void delay(byte ticks) {
 
 static void update_palette(byte idx, byte val) {
     ppu_addr = 0x3f00 | idx;
-    ppu_buffer[ppu_count] = val;
-    ppu_count++;
+    ppu_buffer[0] = val;
+    ppu_count = 1;
     while (ppu_count > 0) { }
 }
 
@@ -467,7 +467,7 @@ static void add_wind(byte side) {
     }
     wind_frame = 0;
 
-    NOISE_VL(0x14);
+    NOISE_VL(0x1f);
     NOISE_HI(0x00);
     NOISE_LO(0x00);
 }
@@ -672,7 +672,46 @@ static void update_score(void) {
     ppu_count = 27;
 }
 
+static void destroy_fish(void) {
+    byte animate = (counter & 3) == 0;
+    for (byte i = 0; i < FISH_SPRITES; i += 4) {
+	if (oam[i] != 255) {
+	    byte sprite = oam[i + 1];
+	    if (sprite < 56) {
+		oam[i + 1] = 56;
+	    }
+	    else if (animate) {
+		oam[i + 1]++;
+	    }
+	    if (sprite >= 68 || sprite == 60) {
+		oam[i] = 255;
+	    }
+	}
+    }
+}
+
+static void angry_cat(void) {
+    update_palette(0x13, 0x26);
+    for (byte n = WIND_SPRITES; n != 0; n += 4) {
+	oam[n] = 255;
+    }
+    byte i = CAT_SPRITES + 1;
+    for (byte n = 0; n < 6; n++) {
+	oam[i] = cat_s[n];
+	i = i + 4;
+    }
+}
+
 static void game_over(void) {
+    angry_cat();
+
+    for (byte i = 0; i < 64; i++) {
+	wait_vblank();
+	sound_sfx();
+	destroy_fish();
+	check_vblank();
+    }
+
     wipe_screen();
 
     static const byte game_over_palette[] = { 0x0f, 0x16, 0x26, 0x36 };
