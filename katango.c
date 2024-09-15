@@ -692,23 +692,45 @@ static void destroy_fish(void) {
 
 static void angry_cat(void) {
     update_palette(0x13, 0x26);
-    for (byte n = WIND_SPRITES; n != 0; n += 4) {
-	oam[n] = 255;
+    byte i = WIND_SPRITES;
+    static const byte rage[] = { 252, 4, 12 };
+    for (byte n = 0; n < 3; n++) {
+	byte middle = n & 1;
+	oam[i++] = oam[CAT_SPRITES] + (middle ? 250 : 0);
+	oam[i++] = (middle ? 28 : 12);
+	oam[i++] = n == 2 ? BIT(6) : 0;
+	oam[i++] = distance + rage[n];
     }
-    byte i = CAT_SPRITES + 1;
+    i = CAT_SPRITES;
     for (byte n = 0; n < 6; n++) {
-	oam[i] = cat_s[n];
+	oam[i + 1] = cat_s[n];
 	i = i + 4;
+    }
+}
+
+static void cat_shiver(void) {
+    if ((counter & 3) == 0) {
+	byte i = WIND_SPRITES;
+	for (byte n = 0; n < 3; n++) {
+	    oam[i + 1] ^= 1;
+	    i = i + 4;
+	}
+	i = CAT_SPRITES;
+	for (byte n = 0; n < 6; n++) {
+	    oam[i + 3] ^= 1;
+	    i = i + 4;
+	}
     }
 }
 
 static void game_over(void) {
     angry_cat();
 
-    for (byte i = 0; i < 64; i++) {
+    for (byte i = 0; i < 100; i++) {
 	wait_vblank();
 	sound_sfx();
 	destroy_fish();
+	cat_shiver();
 	check_vblank();
     }
 
