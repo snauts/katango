@@ -135,6 +135,7 @@ static byte fish_dir;
 static byte fish_left;
 static byte fish_done;
 static byte fish_snd;
+static byte fish_ding;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
@@ -190,6 +191,7 @@ static void reset_level(void) {
     fish_free = 0;
     fish_dir = 0;
     fish_snd = 16;
+    fish_ding = 8;
 
     update_cat();
 }
@@ -571,6 +573,17 @@ static void sound_sfx(void) {
 	TRI_LO(sfx[fish_snd++]);
 	TRI_HI(sfx[fish_snd++]);
     }
+    else if (fish_ding < 8) {
+	static const byte sfx[] = {
+	    0x80, 0x20,
+	    0x00, 0x21,
+	    0x00, 0x22,
+	    0x00, 0x24,
+	};
+	TRI_CR(0x03);
+	TRI_LO(sfx[fish_ding++]);
+	TRI_HI(sfx[fish_ding++]);
+    }
 }
 
 static void lose_live(void) {
@@ -604,6 +617,7 @@ static void catch_fish(byte i, byte s) {
     fish_done = i;
     oam[i + 1] = s;
     oam[i + 2] = 2;
+    fish_ding = 0;
 }
 
 static void fish_expire(byte i) {
