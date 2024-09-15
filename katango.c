@@ -134,7 +134,7 @@ static byte fish_free;
 static byte fish_dir;
 static byte fish_left;
 static byte fish_done;
-static byte fish_snd;
+static byte fish_miss;
 static byte fish_ding;
 
 static void wait_vblank(void) {
@@ -193,9 +193,9 @@ static void reset_level(void) {
     position = 3;
     direction = 0;
 
-    fish_free = 0;
     fish_dir = 0;
-    fish_snd = 16;
+    fish_free = 0;
+    fish_miss = 16;
     fish_ding = 8;
 
     update_cat();
@@ -560,7 +560,7 @@ static void animate_fish(byte index) {
 }
 
 static void sound_sfx(void) {
-    if (fish_snd < 16) {
+    if (fish_miss < 16) {
 	static const byte sfx[] = {
 	    0x10, 0x10, 0x10, 0x11,
 	    0x20, 0x10, 0x20, 0x11,
@@ -568,14 +568,14 @@ static void sound_sfx(void) {
 	    0x80, 0x10, 0x80, 0x11,
 	};
 	TRI_CR(0x0f);
-	TRI_LO(sfx[fish_snd++]);
-	TRI_HI(sfx[fish_snd++]);
+	TRI_LO(sfx[fish_miss++]);
+	TRI_HI(sfx[fish_miss++]);
     }
     else if (fish_ding < 8) {
 	static const byte sfx[] = {
-	    0x80, 0x20,
 	    0x00, 0x21,
 	    0x00, 0x22,
+	    0x00, 0x23,
 	    0x00, 0x24,
 	};
 	TRI_CR(0x03);
@@ -588,7 +588,7 @@ static void lose_live(void) {
     if (lives > 0) {
 	ppu_buffer[17 + lives] = 0;
     }
-    fish_snd = 0;
+    fish_miss = 0;
     lives--;
 }
 
