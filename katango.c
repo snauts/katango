@@ -486,6 +486,17 @@ static void move_wind(void) {
     }
 }
 
+static void select_wind_sprite(void) {
+    for (byte n = WIND_SPRITES; n != 0; n += 4) {
+	if (wind_y_dir > 128) {
+	    oam[n + 1] += 1;
+	}
+	else if (wind_y_dir > 0) {
+	    oam[n + 1] += 2;
+	}
+    }
+}
+
 static void update_cat(void) {
     byte prev = height;
     height = height_map[position];
@@ -497,6 +508,8 @@ static void update_cat(void) {
     else {
 	wind_y_dir = 0 - ((prev - height) >> 3);
     }
+
+    select_wind_sprite();
 }
 
 static void move_cat(void) {
