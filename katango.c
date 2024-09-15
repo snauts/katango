@@ -783,10 +783,11 @@ static void start_game_loop(void) {
 }
 
 static void print_score_n_lives(void) {
-    print_msg("SCORE:00000 LIVES:", 1, 0);
+    print_msg("SCORE:      LIVES:", 1, 0);
     for (byte i = 0; i < lives; i++) {
 	ppu_buffer[18 + i] = 1;
     }
+    score_to_buffer(6);
 }
 
 void game_startup(void) {
