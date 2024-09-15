@@ -748,6 +748,15 @@ static void game_over(void) {
     wait_start_button();
 }
 
+static void emit_test_fish(void) {
+    static byte pos;
+    if ((counter & 0x1f) == 0) {
+	if (pos >= 12) pos = 0;
+	emit_fish(pos >= 7 ? 12 - pos : pos);
+	pos++;
+    }
+}
+
 static void start_game_loop(void) {
     while (lives <= 9) {
 	wait_vblank();
@@ -757,6 +766,7 @@ static void start_game_loop(void) {
 	move_fish();
 	sound_sfx();
 	update_score();
+	emit_test_fish();
 	check_vblank();
     }
     game_over();
