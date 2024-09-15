@@ -139,7 +139,12 @@ static byte fish_ding;
 
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
-    signal = 0;
+}
+
+static void wait_signal(void) {
+    signal = 1;
+    wait_vblank();
+    while (signal) { }
 }
 
 static byte check_button(void) {
@@ -228,7 +233,6 @@ static void hw_init(void) {
 
 void irq_handler(void) {
     byte i;
-    signal = 1;
     PPUADDR(ppu_addr >> 8);
     PPUADDR(ppu_addr & 0xff);
     for (i = 0; i < ppu_count; i++) {
@@ -242,6 +246,7 @@ void irq_handler(void) {
     OAMDMA(0x02); /* oam addr high byte */
     ppu_ctrl();
     PPUMASK(0x1e);
+    signal = 0;
 }
 
 static void delay(byte ticks) {
@@ -320,13 +325,6 @@ static void print_msg(const char *msg, byte x, word y) {
 	i++;
     }
     ppu_update(i);
-}
-
-static void check_vblank(void) {
-    if (signal == 1) {
-	print_msg("VBLANK", 0, 0);
-	for (;;) { }
-    }
 }
 
 static void decode_rle(const byte *data, word where, byte rows) {
@@ -741,11 +739,10 @@ static void game_over(void) {
     angry_cat();
 
     for (byte i = 0; i < 100; i++) {
-	wait_vblank();
+	wait_signal();
 	sound_sfx();
 	destroy_fish();
 	cat_shiver();
-	check_vblank();
     }
 
     wipe_screen();
@@ -773,7 +770,7 @@ static void emit_test_fish(void) {
 
 static void start_game_loop(void) {
     while (lives <= 9) {
-	wait_vblank();
+	wait_signal();
 	move_wind();
 	move_cat();
 	place_cat();
@@ -781,7 +778,6 @@ static void start_game_loop(void) {
 	sound_sfx();
 	update_score();
 	emit_test_fish();
-	check_vblank();
     }
     game_over();
 }
