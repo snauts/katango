@@ -300,7 +300,7 @@ static float frequencies[] = {
 };
 
 static int note(int note, int octave) {
-    float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
+    const float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
     return roundf(cpu / frequencies[9 * note + octave] - 1);
 }
 
