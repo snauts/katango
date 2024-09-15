@@ -143,8 +143,8 @@ static void wait_vblank(void) {
 }
 
 static byte check_button(void) {
-    JOY1_WR(0x00);
     JOY1_WR(0x01);
+    JOY1_WR(0x00);
 
     byte press, state = 0;
     for (byte i = 0; i < 8; i++) {
