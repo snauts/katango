@@ -211,6 +211,7 @@ static void reset_level(void) {
 
     fish_dir = 0;
     fish_free = 0;
+    fish_done = 255;
     fish_miss = 16;
     fish_ding = 8;
 
