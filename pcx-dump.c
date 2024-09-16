@@ -318,10 +318,19 @@ static unsigned get_note(int note, int octave, int length) {
 #define FADE(f, l)	((l & 0xff) | (f << 8))
 #define NOTE(n, o, l)	((l << 16) | (n << 8) | o)
 
-#define Ld2		128
-#define Ld4		64
-#define Ld8		32
-#define Ld16		16
+#define L2		128
+#define L4		64
+#define L8		32
+#define L16		16
+#define L16t		L8 / 3
+#define L16t1		L8 / 3 + 1
+
+/* staccato */
+#define L8s		FADE(5, L8)
+#define L8st		FADE(5, L4 / 3)
+#define L8st1		FADE(5, L4 / 3 + 1)
+#define L8sp		FADE(5, L8 + L16)
+#define L16s		FADE(5, L16)
 
 #define END		(0xff << 24)
 #define DONE		(0xde << 24)
@@ -329,7 +338,7 @@ static unsigned get_note(int note, int octave, int length) {
 #define C(o, l)		NOTE(0x0, o, l)
 #define Cs(o, l)	NOTE(0x1, o, l)
 #define D(o, l)		NOTE(0x2, o, l)
-#define Ds(o, l)	NOTE(0x3, o, l)
+#define Ds(o, l)	ONTE(0x3, o, l)
 #define E(o, l)		NOTE(0x4, o, l)
 #define F(o, l)		NOTE(0x5, o, l)
 #define Fs(o, l)	NOTE(0x6, o, l)
@@ -340,17 +349,48 @@ static unsigned get_note(int note, int octave, int length) {
 #define B(o, l)		NOTE(0xb, o, l)
 
 static unsigned hb_bass_0[] = {
-    D(2, Ld8), P(Ld16), A(2, Ld16), F(3, Ld8), A(2, Ld8), END
+    D(2, L8s), P(L16), A(2, L16), F(3, L8s), A(2, L8s), END
 };
 
 static unsigned hb_bass_1[] = {
-    D(2, Ld8), P(Ld16), As(2, Ld16), G(3, Ld8), A(2, Ld8), END
+    D(2, L8s), P(L16), As(2, L16), G(3, L8s), A(2, L8s), END
 };
 
 static void *habanera_bass[] = {
     hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0,
     hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1, hb_bass_1,
     hb_bass_1,
+    NULL,
+};
+
+static unsigned hb_high_0[] = {
+    P(L2), END
+};
+
+static unsigned hb_high_1[] = {
+    P(L4), D(5, L8s), Cs(5, L8s), END
+};
+
+static unsigned hb_high_2[] = {
+    Cs(5, L8st), Cs(5, L8st), Cs(5, L8st1), B(4, L8s), As(4, L8s), END
+};
+
+static unsigned hb_high_3[] = {
+    A(4, L8sp), A(4, L16s), Gs(4, L8s), G(4, L8s), END
+};
+
+static unsigned hb_high_4[] = {
+    F(4, L16t), G(4, L16t), F(4, L16t1), E(4, L16), F(4, L16),
+    G(4, L8s), F(4, L8s), END
+};
+
+static unsigned hb_high_5[] = {
+    E(4, L8s), P(L8), D(5, L8s), Cs(5, L8s), END
+};
+
+static void *habanera_high[] = {
+    hb_high_0, hb_high_0, hb_high_0, hb_high_1, hb_high_2,
+    hb_high_3, hb_high_4, hb_high_5, hb_high_2,
     NULL,
 };
 
@@ -402,6 +442,7 @@ static void print_sheet(const char *name, void **sheet) {
 
 static int save_music(void) {
     print_sheet("habanera_bass", habanera_bass);
+    print_sheet("habanera_high", habanera_high);
     return 0;
 }
 

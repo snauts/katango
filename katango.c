@@ -804,6 +804,7 @@ static void play_channel(struct Music *m, byte offset) {
 
 static void play_music(void) {
     play_channel(music + 0, 0);
+    play_channel(music + 1, 4);
 }
 
 static void start_game_loop(void) {
@@ -837,6 +838,7 @@ static void init_music(struct Music *channel, byte **sheet) {
 
 static void init_habanera_music(void) {
     init_music(music + 0, habanera_bass);
+    init_music(music + 1, habanera_high);
 }
 
 void game_startup(void) {
