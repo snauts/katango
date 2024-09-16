@@ -322,6 +322,8 @@ static unsigned get_note(int note, int octave, int length) {
 
 /* slurs */
 #define Lr4		FADE(1, L4)
+#define Lr8		FADE(1, L8)
+#define Lr8t		FADE(1, L8t)
 #define Lr16		FADE(1, L16)
 #define Lr16t		FADE(1, L16t)
 
@@ -367,6 +369,10 @@ static unsigned hb_bass_3[] = {
     D(2, Lx8), P(L16), A(2, Lx16), G(3, Lx8), A(2, Lx8), END
 };
 
+static unsigned hb_bass_4[] = {
+    F(2, Lx8), P(L8), P(L4), END
+};
+
 static void *habanera_bass[] = {
     hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0,
     hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1, hb_bass_1,
@@ -374,6 +380,8 @@ static void *habanera_bass[] = {
     hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_2,
     hb_bass_2, hb_bass_2, hb_bass_2, hb_bass_3, hb_bass_3,
     hb_bass_3, hb_bass_3, hb_bass_2, hb_bass_2, hb_bass_2, hb_bass_2,
+    hb_bass_3, hb_bass_3, hb_bass_3, hb_bass_3, hb_bass_2, hb_bass_2,
+    hb_bass_2, hb_bass_2, hb_bass_3, hb_bass_3, hb_bass_3, hb_bass_4,
     NULL,
 };
 
@@ -461,6 +469,48 @@ static unsigned hb_high_J[] = {
     A(4, Ls16), A(4, Ls16), A(4, Ls16), A(4, Ls16), B(4, Ls8), A(4, Ls8), END
 };
 
+static unsigned hb_high_K[] = {
+    G(4, Ls8), P(L16), B(4, Lr16), E(4, Ls8), Fs(4, Ls8), END
+};
+
+static unsigned hb_high_L[] = {
+    G(4, Ls8p), B(4, Lr16), G(4, Ls8), Fs(4, Ls8), END
+};
+
+static unsigned hb_high_M[] = {
+    E(4, Ls8p), Fs(4, Lr16), G(4, Ls8), A(4, Ls8), END
+};
+
+static unsigned hb_high_N[] = {
+    B(4, Ls16), B(4, Ls16), B(4, Ls16), B(4, Ls16), Cs(5, Ls8), B(4, Ls8), END
+};
+
+static unsigned hb_high_O[] = {
+    A(4, Ls8), P(L16), A(4, Lr16), D(5, Ls8), E(5, Ls8), END
+};
+
+static unsigned hb_high_P[] = {
+    Fs(5, Ls8), P(L16), A(4, Lr16), Fs(4, Ls8), E(4, Ls8), END
+};
+
+static unsigned hb_high_Q[] = {
+    A(4, Ls16), A(4, Ls16), A(4, Ls16), A(4, Ls16), D(5, Ls8), Cs(5, Ls8), END
+};
+
+static unsigned hb_high_R[] = {
+    A(4, Ls8), P(L16), B(4, Lr16), E(5, Ls8), Fs(5, Ls8), END
+};
+
+static unsigned hb_high_S[] = {
+    G(5, Ls8), P(L16), B(4, Lr16), G(4, Ls8), Fs(4, Ls8), END
+};
+
+static unsigned hb_high_T[] = {
+    Cs(5, Ls8t), B(4, Lr8t), A(4, Lr8t),
+    G(4, Lr8t), Fs(4, Lr8t), E(4, Ls8t),
+    END
+};
+
 static void *habanera_high[] = {
     hb_high_0, hb_high_0, hb_high_0, hb_high_1, hb_high_2,
     hb_high_3, hb_high_4, hb_high_5, hb_high_2, hb_high_6,
@@ -468,6 +518,8 @@ static void *habanera_high[] = {
     hb_high_5, hb_high_2, hb_high_6, hb_high_7, hb_high_9,
     hb_high_A, hb_high_B, hb_high_C, hb_high_D, hb_high_A,
     hb_high_E, hb_high_F, hb_high_G, hb_high_H, hb_high_I, hb_high_J,
+    hb_high_K, hb_high_L, hb_high_M, hb_high_N, hb_high_O, hb_high_P,
+    hb_high_I, hb_high_Q, hb_high_R, hb_high_S, hb_high_M, hb_high_T,
     NULL,
 };
 
