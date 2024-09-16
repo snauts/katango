@@ -315,14 +315,15 @@ static unsigned get_note(int note, int octave, int length) {
 #define FADE(f, l)	((l & 0xff) | (f << 8))
 #define NOTE(n, o, l)	((l << 16) | (n << 8) | o)
 
-#define L2		120
-#define L4		60
-#define L8		30
+#define L2		96
+#define L4		48
+#define L8		24
 #define L8t		L4 / 3
-#define L16		15
+#define L16		12
 #define L16t		L8 / 3
 
 /* staccato */
+#define L8x		FADE(1, L8)
 #define L8s		FADE(5, L8)
 #define L8st		FADE(5, L8t)
 #define L8sp		FADE(5, L8 + L16)
@@ -345,17 +346,18 @@ static unsigned get_note(int note, int octave, int length) {
 #define B(o, l)		NOTE(0xb, o, l)
 
 static unsigned hb_bass_0[] = {
-    D(2, L8s), P(L16), A(2, L16), F(3, L8s), A(2, L8s), END
+    D(2, L8x), P(L16), A(2, L16), F(3, L8x), A(2, L8x), END
 };
 
 static unsigned hb_bass_1[] = {
-    D(2, L8s), P(L16), As(2, L16), G(3, L8s), A(2, L8s), END
+    D(2, L8x), P(L16), As(2, L16), G(3, L8x), A(2, L8x), END
 };
 
 static void *habanera_bass[] = {
     hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0,
     hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1, hb_bass_1,
     hb_bass_1, hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1,
+    hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_1,
     NULL,
 };
 
@@ -401,6 +403,7 @@ static void *habanera_high[] = {
     hb_high_0, hb_high_0, hb_high_0, hb_high_1, hb_high_2,
     hb_high_3, hb_high_4, hb_high_5, hb_high_2, hb_high_6,
     hb_high_7, hb_high_8, hb_high_2, hb_high_3, hb_high_4,
+    hb_high_5, hb_high_2, hb_high_6, hb_high_7,
     NULL,
 };
 
