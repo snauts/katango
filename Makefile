@@ -14,6 +14,7 @@ build:
 	./pcx-dump.bin -t alley.pcx
 	./pcx-dump.bin -p tiles.chr
 	./pcx-dump.bin -s sprites.pcx
+	./pcx-dump.bin -m ? > music.hdr
 	@echo Compile katango.c
 	@sdcc -mmos6502 $(CFLAGS) katango.c -c
 	@echo Link katango.ihx

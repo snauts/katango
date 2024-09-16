@@ -2,6 +2,8 @@ typedef signed char int8;
 typedef unsigned char byte;
 typedef unsigned short word;
 
+#define NULL ((void *) 0)
+
 void sdcc_deps(void) __naked {
     __asm__(".area ZP (PAG)");
     __asm__("REGTEMP:		.ds 8");
@@ -59,6 +61,7 @@ void rst(void) __naked {
 
 #include "title.hdr"
 #include "alley.hdr"
+#include "music.hdr"
 
 #define BIT(n)		(((byte) 1) << (n))
 

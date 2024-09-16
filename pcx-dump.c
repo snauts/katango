@@ -299,23 +299,111 @@ static float frequencies[] = {
     30.87, 61.74, 123.47, 246.94, 493.88, 987.77, 1975.53, 3951.00, 7902.13,
 };
 
-static int note(int note, int octave) {
+#define DEFAULT_FADE	0xf
+#define OCTAVE_ADJUST	0x1
+
+static unsigned get_note(int note, int octave, int length) {
     const float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
-    return roundf(cpu / frequencies[9 * note + octave] - 1);
+    octave = octave + OCTAVE_ADJUST;
+
+    unsigned period = roundf(cpu / frequencies[9 * note + octave] - 1);
+    period = ((period & 0xff) << 8) | ((period >> 8) & 0x7) | 0x8;
+
+    unsigned fade = (length >> 8) & 0xff;
+    if (fade == 0x00) fade = DEFAULT_FADE;
+
+    return (fade << 24) | (period << 8) | (length & 0xff);
 }
 
-#define C(o)	note(0x0, o)
-#define Cs(o)	note(0x1, o)
-#define D(o)	note(0x2, o)
-#define Ds(o)	note(0x3, o)
-#define E(o)	note(0x4, o)
-#define F(o)	note(0x5, o)
-#define Fs(o)	note(0x6, o)
-#define G(o)	note(0x7, o)
-#define Gs(o)	note(0x8, o)
-#define A(o)	note(0x9, o)
-#define As(o)	note(0xa, o)
-#define B(o)	note(0xb, o)
+#define FADE(f, l)	((l & 0xff) | (f << 8))
+#define NOTE(n, o, l)	((l << 16) | (n << 8) | o)
+
+#define Ld2		128
+#define Ld4		64
+#define Ld8		32
+#define Ld16		16
+
+#define END		(0xff << 24)
+#define DONE		(0xde << 24)
+#define P(l)		(0xf0 << 24) | (l & 0xff)
+#define C(o, l)		NOTE(0x0, o, l)
+#define Cs(o, l)	NOTE(0x1, o, l)
+#define D(o, l)		NOTE(0x2, o, l)
+#define Ds(o, l)	NOTE(0x3, o, l)
+#define E(o, l)		NOTE(0x4, o, l)
+#define F(o, l)		NOTE(0x5, o, l)
+#define Fs(o, l)	NOTE(0x6, o, l)
+#define G(o, l)		NOTE(0x7, o, l)
+#define Gs(o, l)	NOTE(0x8, o, l)
+#define A(o, l)		NOTE(0x9, o, l)
+#define As(o, l)	NOTE(0xa, o, l)
+#define B(o, l)		NOTE(0xb, o, l)
+
+static unsigned hb_bass_0[] = {
+    D(2, Ld8), P(Ld16), A(2, Ld16), F(3, Ld8), A(2, Ld8), END
+};
+
+static unsigned hb_bass_1[] = {
+    D(2, Ld8), P(Ld16), As(2, Ld16), G(3, Ld8), A(2, Ld8), END
+};
+
+static void *habanera_bass[] = {
+    hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0,
+    hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1, hb_bass_1,
+    hb_bass_1,
+    NULL,
+};
+
+static void print_note(unsigned note) {
+    unsigned value;
+    if ((note >> 24) == 0xf0) {
+	value = note & 0xff; /* save pause */
+    }
+    else {
+	value = get_note((note >> 8) & 0xff, note & 0xff, note >> 16);
+    }
+    for (int i = 24; i >= 0; i -= 8) {
+	printf(" 0x%02x,", (value >> i) & 0xff);
+    }
+    printf("\n");
+}
+
+static void print_bar(unsigned *ptr) {
+    printf("static const byte bar_%p[] = {\n", ptr);
+    while (*ptr != END) {
+	print_note(*ptr++);
+    }
+    printf(" 0xff,\n");
+    printf("};\n");
+}
+
+static void print_sheet_bars(void **sheet) {
+    while (*sheet != NULL) {
+	unsigned *bar = *sheet;
+	if (*bar != DONE) {
+	    print_bar(bar);
+	    *bar = DONE;
+	}
+	sheet++;
+    }
+}
+
+static void print_sheet(const char *name, void **sheet) {
+    print_sheet_bars(sheet);
+
+    printf("static const byte * const %s[] = {\n", name);
+    while (*sheet != NULL) {
+	printf(" bar_%p,\n", *sheet);
+	sheet++;
+    }
+    printf(" NULL,\n", *sheet);
+    printf("};\n");
+}
+
+static int save_music(void) {
+    print_sheet("habanera_bass", habanera_bass);
+    return 0;
+}
 
 int main(int argc, char **argv) {
     char option;
@@ -326,6 +414,7 @@ int main(int argc, char **argv) {
 	printf("  -t   save tiles\n");
 	printf("  -p   pad tiles\n");
 	printf("  -s   save sprites\n");
+	printf("  -m   print music\n");
 	return 0;
     }
 
@@ -337,6 +426,8 @@ int main(int argc, char **argv) {
 	return reset_tiles();
     case 'p':
 	return pad_tiles();
+    case 'm':
+	return save_music();
     }
 
     unsigned char *buf = read_pcx(file_name);
