@@ -517,7 +517,7 @@ static unsigned hb_high_T[] = {
 };
 
 static unsigned hb_high_U[] = {
-    D(5, Ls8), P(L16), A(5, Lx16), D(6, Ln8), P(L8), END
+    D(5, Ls8), P(L16), A(5, Lr16), D(6, Ls8), P(L8), END
 };
 
 static void *habanera_high[] = {
