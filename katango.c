@@ -145,6 +145,12 @@ static byte fish_done;
 static byte fish_miss;
 static byte fish_ding;
 
+struct Music {
+    byte wait;
+    byte *bar;
+    byte **sheet;
+} music[2];
+
 static void wait_vblank(void) {
     while ((PPUSTATUS() & 0x80) == 0) { }
 }
@@ -775,6 +781,31 @@ static void emit_test_fish(void) {
     }
 }
 
+static void play_channel(struct Music *m, byte offset) {
+    if (m->wait > 0) {
+	m->wait--;
+    }
+    else {
+	if (*m->bar == 0xff) {
+	    if (*m->sheet == NULL) {
+		lives = 0xf0;
+		return;
+	    }
+	    m->bar = *m->sheet;
+	    m->sheet++;
+	}
+
+	MEM_WR(0x4000 + offset, *m->bar++);
+	MEM_WR(0x4002 + offset, *m->bar++);
+	MEM_WR(0x4003 + offset, *m->bar++);
+	m->wait = *m->bar++;
+    }
+}
+
+static void play_music(void) {
+    play_channel(music + 0, 0);
+}
+
 static void start_game_loop(void) {
     while (lives <= 9) {
 	wait_signal();
@@ -783,6 +814,7 @@ static void start_game_loop(void) {
 	place_cat();
 	move_fish();
 	sound_sfx();
+	play_music();
 	update_score();
 	emit_test_fish();
     }
@@ -795,6 +827,16 @@ static void print_score_n_lives(void) {
 	ppu_buffer[STATS_LIVES + i] = 1;
     }
     score_to_buffer(STATS_SCORE);
+}
+
+static void init_music(struct Music *channel, byte **sheet) {
+    channel->sheet = sheet + 1;
+    channel->bar = *sheet;
+    channel->wait = 0;
+}
+
+static void init_habanera_music(void) {
+    init_music(music + 0, habanera_bass);
 }
 
 void game_startup(void) {
@@ -814,6 +856,7 @@ void game_startup(void) {
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
 	print_score_n_lives();
+	init_habanera_music();
 	start_game_loop();
     }
 }
