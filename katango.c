@@ -750,7 +750,13 @@ static void cat_shiver(void) {
     }
 }
 
+static void mute_music(void) {
+    MEM_WR(0x4000, 0x30);
+    MEM_WR(0x4004, 0x30);
+}
+
 static void game_over(void) {
+    mute_music();
     angry_cat();
 
     for (byte i = 0; i < 100; i++) {
