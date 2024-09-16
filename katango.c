@@ -796,6 +796,7 @@ static void play_channel(struct Music *m, byte offset) {
 	}
 
 	MEM_WR(0x4000 + offset, *m->bar++);
+	MEM_WR(0x4001 + offset, 0x8);
 	MEM_WR(0x4002 + offset, *m->bar++);
 	MEM_WR(0x4003 + offset, *m->bar++);
 	m->wait = *m->bar++;

@@ -300,12 +300,9 @@ static float frequencies[] = {
 };
 
 #define DEFAULT_FADE	0xf
-#define OCTAVE_ADJUST	0x1
 
 static unsigned get_note(int note, int octave, int length) {
     const float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
-    octave = octave + OCTAVE_ADJUST;
-
     unsigned period = roundf(cpu / frequencies[9 * note + octave] - 1);
     period = ((period & 0xff) << 8) | ((period >> 8) & 0x7) | 0x8;
 
@@ -318,17 +315,16 @@ static unsigned get_note(int note, int octave, int length) {
 #define FADE(f, l)	((l & 0xff) | (f << 8))
 #define NOTE(n, o, l)	((l << 16) | (n << 8) | o)
 
-#define L2		128
-#define L4		64
-#define L8		32
-#define L16		16
+#define L2		120
+#define L4		60
+#define L8		30
+#define L8t		L4 / 3
+#define L16		15
 #define L16t		L8 / 3
-#define L16t1		L8 / 3 + 1
 
 /* staccato */
 #define L8s		FADE(5, L8)
-#define L8st		FADE(5, L4 / 3)
-#define L8st1		FADE(5, L4 / 3 + 1)
+#define L8st		FADE(5, L8t)
 #define L8sp		FADE(5, L8 + L16)
 #define L16s		FADE(5, L16)
 
@@ -372,7 +368,7 @@ static unsigned hb_high_1[] = {
 };
 
 static unsigned hb_high_2[] = {
-    Cs(5, L8st), Cs(5, L8st), Cs(5, L8st1), B(4, L8s), As(4, L8s), END
+    Cs(5, L8st), Cs(5, L8st), Cs(5, L8st), B(4, L8s), As(4, L8s), END
 };
 
 static unsigned hb_high_3[] = {
@@ -380,7 +376,7 @@ static unsigned hb_high_3[] = {
 };
 
 static unsigned hb_high_4[] = {
-    F(4, L16t), G(4, L16t), F(4, L16t1), E(4, L16), F(4, L16),
+    F(4, L16t), G(4, L16t), F(4, L16t), E(4, L16), F(4, L16),
     G(4, L8s), F(4, L8s), END
 };
 
@@ -393,7 +389,7 @@ static unsigned hb_high_6[] = {
 };
 
 static unsigned hb_high_7[] = {
-    E(4, L16t), F(4, L16t), E(4, L16t1), D(4, L16), E(4, L16),
+    E(4, L16t), F(4, L16t), E(4, L16t), D(4, L16), E(4, L16),
     F(4, L8s), E(4, L8s), END
 };
 
