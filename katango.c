@@ -107,6 +107,11 @@ void rst(void) __naked {
 #define WIND_SPRITES	244
 #define CAT_SPRITES	220
 
+#define STATS_STRING	"SCORE:      LIVES:"
+#define STATS_SCORE	6
+#define STATS_LIVES	18
+#define STATS_OFFSET	1
+
 extern byte oam[256];
 
 extern volatile word ppu_addr;
@@ -585,11 +590,10 @@ static void sound_sfx(void) {
 }
 
 static void lose_live(void) {
-    if (lives > 0) {
-	ppu_buffer[17 + lives] = 0;
-    }
     fish_miss = 0;
-    lives--;
+    if (lives-- > 0) {
+	ppu_buffer[STATS_LIVES + lives] = 0;
+    }
 }
 
 static void animate_drop(byte index) {
@@ -679,8 +683,8 @@ static void score_to_buffer(byte offset) {
 }
 
 static void update_score(void) {
-    score_to_buffer(6);
-    ppu_addr = 0x2021;
+    score_to_buffer(STATS_SCORE);
+    ppu_addr = 0x2020 + STATS_OFFSET;
     ppu_count = 27;
 }
 
@@ -783,11 +787,11 @@ static void start_game_loop(void) {
 }
 
 static void print_score_n_lives(void) {
-    print_msg("SCORE:      LIVES:", 1, 0);
+    print_msg(STATS_STRING, STATS_OFFSET, 0);
     for (byte i = 0; i < lives; i++) {
-	ppu_buffer[18 + i] = 1;
+	ppu_buffer[STATS_LIVES + i] = 1;
     }
-    score_to_buffer(6);
+    score_to_buffer(STATS_SCORE);
 }
 
 void game_startup(void) {
