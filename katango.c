@@ -147,6 +147,8 @@ static byte fish_ding;
 
 struct Music {
     byte wait;
+    byte pos;
+    byte *vol;
     byte *bar;
     byte **sheet;
 } music[2];
@@ -781,8 +783,39 @@ static void emit_test_fish(void) {
     }
 }
 
+static const byte silent[] = {
+    0x30, 0xff
+};
+
+static const byte slur[] = {
+    0x3F, 0x3E, 0x3C, 0x3A, 0x39, 0xff
+};
+
+static const byte quiet_slur[] = {
+    0x38, 0x37, 0x36, 0x35, 0x34, 0xff
+};
+
+static const byte quiet_staccato[] = {
+    0x38, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0xff
+};
+
+static const byte staccato[] = {
+    0x3f, 0x3e, 0x3d, 0x3c, 0x3b, 0x3a, 0x39, 0x38,
+    0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x31, 0x30,
+    0xff
+};
+
+static const byte * const envelopes[] = {
+    silent, slur, quiet_staccato, quiet_slur, staccato,
+};
+
 static void play_channel(struct Music *m, byte offset) {
     if (m->wait > 0) {
+	byte vol = m->vol[m->pos];
+	if (vol < 255) {
+	    MEM_WR(0x4000 + offset, vol);
+	    m->pos++;
+	}
 	m->wait--;
     }
     else {
@@ -795,11 +828,13 @@ static void play_channel(struct Music *m, byte offset) {
 	    m->sheet++;
 	}
 
-	MEM_WR(0x4000 + offset, *m->bar++);
+	m->vol = (void *) envelopes[*m->bar++];
+	MEM_WR(0x4000 + offset, m->vol[0]);
 	MEM_WR(0x4001 + offset, 0x8);
 	MEM_WR(0x4002 + offset, *m->bar++);
 	MEM_WR(0x4003 + offset, *m->bar++);
 	m->wait = *m->bar++;
+	m->pos = 1;
     }
 }
 
@@ -834,7 +869,9 @@ static void print_score_n_lives(void) {
 static void init_music(struct Music *channel, byte **sheet) {
     channel->sheet = sheet + 1;
     channel->bar = *sheet;
+    channel->vol = NULL;
     channel->wait = 0;
+    channel->pos = 0;
 }
 
 static void init_habanera_music(void) {
