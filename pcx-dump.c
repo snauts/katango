@@ -353,11 +353,21 @@ static unsigned hb_bass_1[] = {
     D(2, L8x), P(L16), As(2, L16), G(3, L8x), A(2, L8x), END
 };
 
+static unsigned hb_bass_2[] = {
+    D(2, L8x), P(L16), A(2, L16), Fs(3, L8x), A(2, L8x), END
+};
+
+static unsigned hb_bass_3[] = {
+    D(2, L8x), P(L16), A(2, L16), G(3, L8x), A(2, L8x), END
+};
+
 static void *habanera_bass[] = {
     hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0, hb_bass_0,
     hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1, hb_bass_1,
     hb_bass_1, hb_bass_0, hb_bass_0, hb_bass_1, hb_bass_1,
-    hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_1,
+    hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_1, hb_bass_2,
+    hb_bass_2, hb_bass_2, hb_bass_2, hb_bass_3, hb_bass_3,
+    hb_bass_3, hb_bass_3, hb_bass_2, hb_bass_2, hb_bass_2, hb_bass_2,
     NULL,
 };
 
@@ -399,11 +409,59 @@ static unsigned hb_high_8[] = {
     D(4, L4), D(5, L8s), Cs(5, L8s), END
 };
 
+static unsigned hb_high_9[] = {
+    D(4, L8s), P(L8), D(5, L8s), Cs(5, L8s), END
+};
+
+static unsigned hb_high_A[] = {
+    C(5, L8st), C(5, L8st), C(5, L8st), B(4, L8s), As(4, L8s), END
+};
+
+static unsigned hb_high_B[] = {
+    A(4, L8sp), A(4, L16), Gs(4, L8s), G(4, L8s), END
+};
+
+static unsigned hb_high_C[] = {
+    Fs(4, L16t), G(4, L16t), Fs(4, L16t), E(4, L16), Fs(4, L16),
+    G(4, L8s), Fs(4, L8s), END
+};
+
+static unsigned hb_high_D[] = {
+    E(4, L8s), P(L8), D(5, L8s), Cs(5, L8s), END
+};
+
+static unsigned hb_high_E[] = {
+    A(4, L8sp), A(4, L16), G(4, L8s), Fs(4, L8s), END
+};
+
+static unsigned hb_high_F[] = {
+    E(4, L16t), Fs(4, L16t), E(4, L16t), D(4, L16), E(4, L16),
+    Fs(4, L8s), E(4, L8s), END
+};
+
+static unsigned hb_high_G[] = {
+    D(4, L8s), P(L16), A(4, L16), D(4, L8s), E(4, L8s), END
+};
+
+static unsigned hb_high_H[] = {
+    Fs(4, L8sp), A(4, L16), Fs(4, L8s), E(4, L8s), END
+};
+
+static unsigned hb_high_I[] = {
+    D(4, L8sp), E(4, L16), Fs(4, L8s), G(4, L8s), END
+};
+
+static unsigned hb_high_J[] = {
+    A(4, L16s), A(4, L16s), A(4, L16s), A(4, L16s), B(4, L8s), A(4, L8s), END
+};
+
 static void *habanera_high[] = {
     hb_high_0, hb_high_0, hb_high_0, hb_high_1, hb_high_2,
     hb_high_3, hb_high_4, hb_high_5, hb_high_2, hb_high_6,
     hb_high_7, hb_high_8, hb_high_2, hb_high_3, hb_high_4,
-    hb_high_5, hb_high_2, hb_high_6, hb_high_7,
+    hb_high_5, hb_high_2, hb_high_6, hb_high_7, hb_high_9,
+    hb_high_A, hb_high_B, hb_high_C, hb_high_D, hb_high_A,
+    hb_high_E, hb_high_F, hb_high_G, hb_high_H, hb_high_I, hb_high_J,
     NULL,
 };
 
