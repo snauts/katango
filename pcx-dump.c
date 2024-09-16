@@ -338,7 +338,7 @@ static unsigned get_note(int note, int octave, int length) {
 #define C(o, l)		NOTE(0x0, o, l)
 #define Cs(o, l)	NOTE(0x1, o, l)
 #define D(o, l)		NOTE(0x2, o, l)
-#define Ds(o, l)	ONTE(0x3, o, l)
+#define Ds(o, l)	NOTE(0x3, o, l)
 #define E(o, l)		NOTE(0x4, o, l)
 #define F(o, l)		NOTE(0x5, o, l)
 #define Fs(o, l)	NOTE(0x6, o, l)
