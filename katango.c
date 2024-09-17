@@ -159,7 +159,6 @@ static void wait_vblank(void) {
 
 static void wait_signal(void) {
     signal = 1;
-    wait_vblank();
     while (signal) { }
 }
 
