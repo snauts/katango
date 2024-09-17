@@ -768,6 +768,41 @@ static void mute_music(void) {
     MEM_WR(0x4004, 0x30);
 }
 
+static void msg_with_delay(const char *str, byte x, byte y) {
+    print_msg(str, x, y);
+    delay(50);
+}
+
+static void set_attributes(byte offset, byte data, byte amount) {
+    ppu_addr = 0x23c0 + offset;
+    memset(ppu_buffer, data, 0x20);
+    ppu_update(amount);
+}
+
+static void game_done(void) {
+    update_palette(0x0d, 0x16);
+    update_palette(0x0e, 0x26);
+    update_palette(0x0f, 0x36);
+    decode_rle(title_attr, 0x23d0, 1);
+    decode_rle(title_data, 0x2100, 13);
+
+    set_attributes(0x00, 0xff, 24);
+    set_attributes(0x30, 0xff, 8);
+    set_attributes(0x1c, 0x5f, 4);
+
+    msg_with_delay("@ CONGRATULATIONS @", 6, 2);
+    msg_with_delay("HENCEFORTH", 11, 7);
+    msg_with_delay("YOU SHALL BE KNOWN AS", 6, 8);
+    msg_with_delay("MASTER OF", 17, 12);
+    animate_title_text();
+
+    print_msg("SCORE:", 10, 24);
+    score_to_buffer(0);
+    ppu_addr = 0x2330;
+    ppu_update(5);
+    wait_start_button();
+}
+
 static void game_over(void) {
     mute_music();
     angry_cat();
