@@ -12,6 +12,7 @@ void sdcc_deps(void) __naked {
     __asm__("_ppu_count:	.ds 1");
     __asm__("_ppu_buffer:	.ds 32");
     __asm__("_score:		.ds 5");
+    __asm__("_level:		.ds 1");
     __asm__("_lives:		.ds 1");
     __asm__("_height:		.ds 1");
     __asm__("_signal:		.ds 1");
@@ -126,6 +127,7 @@ extern volatile byte signal;
 
 extern byte score[5];
 
+extern byte level;
 extern byte lives;
 extern byte height;
 extern byte buttons;
@@ -222,6 +224,7 @@ static void reset_level(void) {
 static void reset_game_state(void) {
     memset(score, 0, 5);
     lives = 9;
+    level = 1;
 
     memset(height_map, 208, 7);
 
@@ -871,7 +874,7 @@ static void play_channel(struct Music *m, byte offset) {
     else {
 	if (*m->bar == 0xff) {
 	    if (*m->sheet == NULL) {
-		lives = 0xf0;
+		lives |= 0x80;
 		return;
 	    }
 	    m->bar = *m->sheet;
