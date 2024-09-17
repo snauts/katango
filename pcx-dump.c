@@ -598,12 +598,17 @@ static unsigned hb_fish_0[] = {
     FISH(-1, L1), END
 };
 
+
+static unsigned hb_fish_2[] = {
+    FISH(-1, L2), FISH(2, L2), END
+};
+
 static unsigned hb_fish_1[] = {
     FISH(3, L1), END
 };
 
 static void *habanera_fish[] = {
-    hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_1,
+    hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_2, hb_fish_1,
     hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
     hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
     hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
@@ -639,7 +644,7 @@ static void print_fish(const char *name, struct Fish *map, int count) {
 	time += offset;
     }
     if ((count & 3) != 0) printf("\n");
-    printf(" 0x00,\n");
+    printf(" 0x00, 0xff\n");
     printf("};\n");
 }
 
@@ -651,7 +656,7 @@ static void print_level(const char *name, void **level, const int *height) {
 	unsigned *fish = *level;
 	while (*fish != END) {
 	    char type = *fish >> 16;
-	    if (type > 0) {
+	    if (type >= 0) {
 		if (count >= MAX_FISH) {
 		    printf("#error TOO MUCH FISH\n");
 		    return;

@@ -786,9 +786,9 @@ static void fish_fall(void) {
     if (fish_tick > 0) {
 	fish_tick--;
     }
-    else if (*fish_ptr > 0) {
-	fish_tick = *fish_ptr++;
+    else if (*fish_ptr < 0xff) {
 	emit_fish(*fish_ptr++);
+	fish_tick = *fish_ptr++;
     }
 }
 
@@ -882,8 +882,8 @@ static void init_music(struct Music *channel, byte **sheet) {
 static void init_habanera_music(void) {
     init_music(music + 0, habanera_bass);
     init_music(music + 1, habanera_high);
-    fish_ptr = habanera_fish;
-    fish_tick = 0;
+    fish_ptr = habanera_fish + 1;
+    fish_tick = *habanera_fish;
 }
 
 void game_startup(void) {
