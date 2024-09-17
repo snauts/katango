@@ -794,13 +794,11 @@ static void game_over(void) {
 }
 
 static void fish_fall(void) {
-    if (fish_tick > 0) {
-	fish_tick--;
-    }
-    else if (*fish_ptr < 0xff) {
+    if (fish_tick == 0 && *fish_ptr < 0xff) {
 	emit_fish(*fish_ptr++);
 	fish_tick = *fish_ptr++;
     }
+    fish_tick--;
 }
 
 static const byte silent[] = {
@@ -834,7 +832,6 @@ static void play_channel(struct Music *m, byte offset) {
 	    MEM_WR(0x4000 + offset, vol);
 	    m->vol++;
 	}
-	m->wait--;
     }
     else {
 	if (*m->bar == 0xff) {
@@ -853,6 +850,7 @@ static void play_channel(struct Music *m, byte offset) {
 	MEM_WR(0x4003 + offset, *m->bar++);
 	m->wait = *m->bar++;
     }
+    m->wait--;
 }
 
 static void play_music(void) {
