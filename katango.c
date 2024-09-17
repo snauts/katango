@@ -147,7 +147,6 @@ static byte fish_ding;
 
 struct Music {
     byte wait;
-    byte pos;
     byte *vol;
     byte *bar;
     byte **sheet;
@@ -815,10 +814,10 @@ static const byte * const envelopes[] = {
 
 static void play_channel(struct Music *m, byte offset) {
     if (m->wait > 0) {
-	byte vol = m->vol[m->pos];
+	byte vol = *m->vol;
 	if (vol < 255) {
 	    MEM_WR(0x4000 + offset, vol);
-	    m->pos++;
+	    m->vol++;
 	}
 	m->wait--;
     }
@@ -833,12 +832,11 @@ static void play_channel(struct Music *m, byte offset) {
 	}
 
 	m->vol = (void *) envelopes[*m->bar++];
-	MEM_WR(0x4000 + offset, m->vol[0]);
+	MEM_WR(0x4000 + offset, *m->vol++);
 	MEM_WR(0x4001 + offset, 0x8);
 	MEM_WR(0x4002 + offset, *m->bar++);
 	MEM_WR(0x4003 + offset, *m->bar++);
 	m->wait = *m->bar++;
-	m->pos = 1;
     }
 }
 
@@ -875,7 +873,6 @@ static void init_music(struct Music *channel, byte **sheet) {
     channel->bar = *sheet;
     channel->vol = NULL;
     channel->wait = 0;
-    channel->pos = 0;
 }
 
 static void init_habanera_music(void) {
