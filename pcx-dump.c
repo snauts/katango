@@ -581,9 +581,98 @@ static void print_sheet(const char *name, void **sheet) {
     printf("};\n");
 }
 
+static const int alley_height[] = {
+    208, 208, 208, 208, 208, 208, 208
+};
+
+#define MAX_FISH 10000
+
+struct Fish {
+    int time;
+    char type;
+};
+
+#define FISH(n, p) ((n << 16) | p)
+
+static unsigned hb_fish_0[] = {
+    FISH(-1, L1), END
+};
+
+static unsigned hb_fish_1[] = {
+    FISH(3, L1), END
+};
+
+static void *habanera_fish[] = {
+    hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
+    hb_fish_1, hb_fish_1,
+    NULL,
+};
+
+static int output_byte(int count, unsigned char data) {
+    printf(" 0x%02x,", data);
+    if ((count & 7) == 7) {
+	printf("\n");
+    }
+    return count + 1;
+}
+
+#define BEST_SCORE 8
+
+static void print_fish(const char *name, struct Fish *map, int count) {
+    int time = 0;
+    printf("static const byte %s[] = {\n", name);
+    for (int i = 0; i < count; i++) {
+	int offset = map[i].time - time;
+	if (offset > 255 || offset == 0) {
+	    printf("#error BAD INTERVAL\n");
+	}
+	printf(" 0x%02x,", offset);
+	printf(" 0x%02x,", map[i].type);
+	if ((i & 3) == 3) printf("\n");
+	time += offset;
+    }
+    if ((count & 3) != 0) printf("\n");
+    printf(" 0x00,\n");
+    printf("};\n");
+}
+
+static void print_level(const char *name, void **level, const int *height) {
+    int time = 0;
+    int count = 0;
+    struct Fish map[MAX_FISH];
+    while (*level) {
+	unsigned *fish = *level;
+	while (*fish != END) {
+	    char type = *fish >> 16;
+	    if (type > 0) {
+		if (count >= MAX_FISH) {
+		    printf("#error TOO MUCH FISH\n");
+		    return;
+		}
+		map[count].time = time - height[type] + BEST_SCORE;
+		map[count].type = type;
+		count++;
+	    }
+	    time += (*fish & 0xffff);
+	    fish++;
+	}
+	level++;
+    }
+
+    print_fish(name, map, count);
+}
+
 static int save_music(void) {
     print_sheet("habanera_bass", habanera_bass);
     print_sheet("habanera_high", habanera_high);
+    print_level("habanera_fish", habanera_fish, alley_height);
     return 0;
 }
 
