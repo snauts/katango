@@ -145,7 +145,7 @@ static byte fish_done;
 static byte fish_miss;
 static byte fish_ding;
 
-static byte *fish_ptr;
+static const byte *fish_ptr;
 static byte fish_tick;
 
 struct Music {

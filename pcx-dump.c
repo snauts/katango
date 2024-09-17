@@ -311,7 +311,7 @@ static unsigned get_note(int note, int octave, int length) {
 }
 
 #define FADE(f, l)	((l & 0xff) | (f << 8))
-#define NOTE(n, o, l)	((l << 16) | (n << 8) | o)
+#define NOTE(n, o, l)	((l & 0xffff) | (n << 16) | (o << 24))
 
 #define L1		96
 #define L2		48
@@ -541,7 +541,7 @@ static void print_note(unsigned note) {
 	value = note & 0xff; /* save pause */
     }
     else {
-	value = get_note((note >> 8) & 0xff, note & 0xff, note >> 16);
+	value = get_note((note >> 16) & 0xff, note >> 24, note & 0xffff);
     }
     for (int i = 24; i >= 0; i -= 8) {
 	printf(" 0x%02x,", (value >> i) & 0xff);
@@ -581,7 +581,7 @@ static void print_sheet(const char *name, void **sheet) {
     printf("};\n");
 }
 
-static const int alley_height[] = {
+static int alley_height[] = {
     208, 208, 208, 208, 208, 208, 208
 };
 
@@ -592,31 +592,16 @@ struct Fish {
     char type;
 };
 
-#define FISH(n, p) ((n << 16) | p)
-
-static unsigned hb_fish_0[] = {
-    FISH(-1, L1), END
-};
-
-
-static unsigned hb_fish_2[] = {
-    FISH(-1, L2), FISH(2, L2), END
-};
-
-static unsigned hb_fish_1[] = {
-    FISH(3, L1), END
-};
-
-static void *habanera_fish[] = {
-    hb_fish_0, hb_fish_0, hb_fish_0, hb_fish_2, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1, hb_fish_1,
-    hb_fish_1, hb_fish_1,
+static char *habanera_fish[] = {
+    "_______", "_______", "_______", "21_____", "01212__",
+    "3432___", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______", "_______", "_______", "_______",
+    "_______", "_______",
     NULL,
 };
 
@@ -630,7 +615,7 @@ static int output_byte(int count, unsigned char data) {
 
 #define BEST_SCORE 8
 
-static void print_fish(const char *name, struct Fish *map, int count) {
+static void print_fish(char *name, struct Fish *map, int count) {
     int time = 0;
     printf("static const byte %s[] = {\n", name);
     for (int i = 0; i < count; i++) {
@@ -648,36 +633,50 @@ static void print_fish(const char *name, struct Fish *map, int count) {
     printf("};\n");
 }
 
-static void print_level(const char *name, void **level, const int *height) {
+static int build_fish(void *ptr, char **level, int *height, void **sheet) {
     int time = 0;
     int count = 0;
-    struct Fish map[MAX_FISH];
-    while (*level) {
-	unsigned *fish = *level;
-	while (*fish != END) {
-	    char type = *fish >> 16;
-	    if (type >= 0) {
-		if (count >= MAX_FISH) {
-		    printf("#error TOO MUCH FISH\n");
-		    return;
+    struct Fish *map = ptr;
+    while (*level && *sheet) {
+	int index = 0;
+	unsigned *note = *sheet;
+	const char *fish = *level;
+	while (*note != END) {
+	    if (*note >> 24) {
+		char type = fish[index];
+		if (type >= '0' && type <= '9') {
+		    type = type - '0';
+		    if (count >= MAX_FISH) {
+			printf("#error TOO MUCH FISH\n");
+			return MAX_FISH;
+		    }
+		    map[count].time = time - height[type] + BEST_SCORE;
+		    map[count].type = type;
+		    count++;
+		    index++;
 		}
-		map[count].time = time - height[type] + BEST_SCORE;
-		map[count].type = type;
-		count++;
+		else if (type == 'x') {
+		    index++;
+		}
 	    }
-	    time += (*fish & 0xffff);
-	    fish++;
+	    time += *note & 0xff;
+	    note++;
 	}
 	level++;
+	sheet++;
     }
+    return count;
+}
 
-    print_fish(name, map, count);
+static void print_level(char *name, char **level, int *height, void **sheet) {
+    struct Fish map[MAX_FISH];
+    print_fish(name, map, build_fish(map, level, height, sheet));
 }
 
 static int save_music(void) {
+    print_level("habanera_fish", habanera_fish, alley_height, habanera_high);
     print_sheet("habanera_bass", habanera_bass);
     print_sheet("habanera_high", habanera_high);
-    print_level("habanera_fish", habanera_fish, alley_height);
     return 0;
 }
 
