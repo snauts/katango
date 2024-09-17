@@ -719,6 +719,14 @@ static void destroy_fish(void) {
     }
 }
 
+static void cat_sitting(void) {
+    byte i = CAT_SPRITES;
+    for (byte n = 0; n < 6; n++) {
+	oam[i + 1] = cat_s[n];
+	i = i + 4;
+    }
+}
+
 static void angry_cat(void) {
     update_palette(0x13, 0x26);
     byte i = WIND_SPRITES;
@@ -730,11 +738,11 @@ static void angry_cat(void) {
 	oam[i++] = n == 2 ? BIT(6) : 0;
 	oam[i++] = distance + rage[n];
     }
-    i = CAT_SPRITES;
-    for (byte n = 0; n < 6; n++) {
-	oam[i + 1] = cat_s[n];
-	i = i + 4;
-    }
+    cat_sitting();
+    NOISE_VL(0x3c);
+    NOISE_HI(0x01);
+    NOISE_LO(0xf8);
+    wind_frame = 12 << 3;
 }
 
 static void cat_shiver(void) {
@@ -750,6 +758,9 @@ static void cat_shiver(void) {
 	    i = i + 4;
 	}
     }
+
+    NOISE_VL(0x30 | (wind_frame >> 3));
+    if (wind_frame > 0) wind_frame--;
 }
 
 static void mute_music(void) {
