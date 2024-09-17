@@ -783,6 +783,7 @@ static void set_attributes(byte offset, byte data, byte amount) {
 }
 
 static void game_done(void) {
+    wipe_palette();
     update_palette(0x0d, 0x16);
     update_palette(0x0e, 0x26);
     update_palette(0x0f, 0x36);
