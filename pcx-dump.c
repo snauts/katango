@@ -613,7 +613,7 @@ static int output_byte(int count, unsigned char data) {
     return count + 1;
 }
 
-#define BEST_SCORE 8
+#define BEST_SCORE 12
 
 static void print_fish(char *name, struct Fish *map, int count) {
     int time = 0;
