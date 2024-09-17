@@ -320,23 +320,25 @@ static unsigned get_note(int note, int octave, int length) {
 #define L16		12
 #define L16t		L8 / 3
 
-/* slurs */
-#define Lr4		FADE(1, L4)
-#define Lr8		FADE(1, L8)
-#define Lr8t		FADE(1, L8t)
-#define Lr16		FADE(1, L16)
-#define Lr16t		FADE(1, L16t)
-
-/* bass */
-#define Ln8		FADE(2, L8)
-#define Lx8		FADE(3, L8)
-#define Lx16		FADE(3, L16)
-
 /* staccato */
-#define Ls8		FADE(4, L8)
-#define Ls8t		FADE(4, L8t)
-#define Ls8p		FADE(4, L8 + L16)
-#define Ls16		FADE(4, L16)
+#define Ls8		FADE(1, L8)
+#define Ls8t		FADE(1, L8t)
+#define Ls8p		FADE(1, L8 + L16)
+#define Ls16		FADE(1, L16)
+
+/* slurs */
+#define Lr4		FADE(2, L4)
+#define Lr8		FADE(2, L8)
+#define Lr8t		FADE(2, L8t)
+#define Lr16		FADE(2, L16)
+#define Lr16t		FADE(2, L16t)
+
+/* quiet staccato */
+#define Ls8q		FADE(3, L8)
+
+/* quiet slur */
+#define Lr8q		FADE(4, L8)
+#define Lr16q		FADE(4, L16)
 
 #define END		(0xff << 24)
 #define DONE		0xdeadbeef
@@ -355,27 +357,27 @@ static unsigned get_note(int note, int octave, int length) {
 #define B(o, l)		NOTE(0xb, o, l)
 
 static unsigned hb_bass_0[] = {
-    D(2, Ln8), P(L16), A(2, Lx16), F(3, Ln8), A(2, Ln8), END
+    D(2, Ls8q), P(L16), A(2, Lr16q), F(3, Ls8q), A(2, Ls8q), END
 };
 
 static unsigned hb_bass_1[] = {
-    D(2, Ln8), P(L16), As(2, Lx16), G(3, Ln8), A(2, Ln8), END
+    D(2, Ls8q), P(L16), As(2, Lr16q), G(3, Ls8q), A(2, Ls8q), END
 };
 
 static unsigned hb_bass_2[] = {
-    D(2, Ln8), P(L16), A(2, Lx16), Fs(3, Ln8), A(2, Ln8), END
+    D(2, Ls8q), P(L16), A(2, Lr16q), Fs(3, Ls8q), A(2, Ls8q), END
 };
 
 static unsigned hb_bass_3[] = {
-    D(2, Ln8), P(L16), A(2, Lx16), G(3, Ln8), A(2, Ln8), END
+    D(2, Ls8q), P(L16), A(2, Lr16q), G(3, Ls8q), A(2, Ls8q), END
 };
 
 static unsigned hb_bass_4[] = {
-    D(2, Ln8), P(L8), A(3, Ln8), G(3, Lx8), END
+    D(2, Ls8q), P(L8), A(3, Ls8q), G(3, Lr8q), END
 };
 
 static unsigned hb_bass_5[] = {
-    Fs(3, Ln8), P(L16), A(2, Lx16), D(2, Ln8), P(L8), END
+    Fs(3, Ls8q), P(L16), A(2, Lr16q), D(2, Ls8q), P(L8), END
 };
 
 static void *habanera_bass[] = {
