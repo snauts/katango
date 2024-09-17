@@ -145,6 +145,9 @@ static byte fish_done;
 static byte fish_miss;
 static byte fish_ding;
 
+static byte *fish_ptr;
+static byte fish_tick;
+
 struct Music {
     byte wait;
     byte *vol;
@@ -779,12 +782,13 @@ static void game_over(void) {
     wait_start_button();
 }
 
-static void emit_test_fish(void) {
-    static byte pos;
-    if ((counter & 0x1f) == 0) {
-	if (pos >= 12) pos = 0;
-	emit_fish(pos >= 7 ? 12 - pos : pos);
-	pos++;
+static void fish_fall(void) {
+    if (fish_tick > 0) {
+	fish_tick--;
+    }
+    else if (*fish_ptr > 0) {
+	fish_tick = *fish_ptr++;
+	emit_fish(*fish_ptr++);
     }
 }
 
@@ -854,8 +858,8 @@ static void start_game_loop(void) {
 	move_fish();
 	sound_sfx();
 	play_music();
+	fish_fall();
 	update_score();
-	emit_test_fish();
     }
     game_over();
 }
@@ -878,6 +882,8 @@ static void init_music(struct Music *channel, byte **sheet) {
 static void init_habanera_music(void) {
     init_music(music + 0, habanera_bass);
     init_music(music + 1, habanera_high);
+    fish_ptr = habanera_fish;
+    fish_tick = 0;
 }
 
 void game_startup(void) {
