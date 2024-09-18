@@ -945,6 +945,17 @@ static void init_habanera_music(void) {
     fish_tick = *habanera_fish;
 }
 
+static void disable_music(byte channel) {
+    static const byte * const empty[] = { NULL };
+    static const byte stop[] = { 0xff };
+    struct Music *m = music;
+    if (channel == 1) m++;
+
+    m->sheet = (byte **) empty;
+    m->bar = (byte *) stop;
+    m->wait = 0;
+}
+
 static void load_level(void) {
     wipe_screen();
     reset_level();
