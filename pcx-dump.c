@@ -356,6 +356,10 @@ static unsigned get_note(int note, int octave, int length) {
 #define As(o, l)	NOTE(0xa, o, l)
 #define B(o, l)		NOTE(0xb, o, l)
 
+static unsigned mb_silent[] = {
+    P(L1), END
+};
+
 static unsigned hb_bass_0[] = {
     D(2, Ls4q), P(L8), A(2, Lr8q), F(3, Ls4q), A(2, Ls4q), END
 };
@@ -391,10 +395,6 @@ static void *habanera_bass[] = {
     hb_bass_2, hb_bass_2, hb_bass_3, hb_bass_3, hb_bass_3,
     hb_bass_4, hb_bass_5,
     NULL,
-};
-
-static unsigned hb_high_0[] = {
-    P(L1), END
 };
 
 static unsigned hb_high_1[] = {
@@ -523,7 +523,7 @@ static unsigned hb_high_U[] = {
 };
 
 static void *habanera_high[] = {
-    hb_high_0, hb_high_0, hb_high_0, hb_high_1, hb_high_2,
+    mb_silent, mb_silent, mb_silent, hb_high_1, hb_high_2,
     hb_high_3, hb_high_4, hb_high_5, hb_high_2, hb_high_6,
     hb_high_7, hb_high_8, hb_high_2, hb_high_3, hb_high_4,
     hb_high_5, hb_high_2, hb_high_6, hb_high_7, hb_high_9,
