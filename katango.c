@@ -111,7 +111,7 @@ void rst(void) __naked {
 #define WIND_SPRITES	244
 #define CAT_SPRITES	220
 
-#define STATS_STRING	"SCORE:      LIVES:"
+#define STATS_STRING	"SCORE:      DROPS:"
 #define STATS_SCORE	6
 #define STATS_LIVES	18
 #define STATS_OFFSET	1
