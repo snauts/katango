@@ -209,7 +209,7 @@ static void init_memory(void) {
 }
 
 static void update_cat(void);
-static void reset_level(void) {
+static void reset_level_variables(void) {
     position = 3;
     direction = 0;
     lives &= ~0x80;
@@ -227,8 +227,16 @@ static void reset_game_state(void) {
     memset(score, 0, 5);
     lives = 9;
     level = 1;
+}
 
+static void setup_alley_height(void) {
     memset(height_map, 208, 7);
+}
+
+static void setup_ocean_height(void) {
+    for (byte i = 0; i < 7; i++) {
+	height_map[i] = i & 1 ? 204 : 188;
+    }
 }
 
 static void ppu_ctrl(void) {
@@ -1014,20 +1022,22 @@ static void victory_dance(void) {
 
 static void load_level(void) {
     wipe_screen();
-    reset_level();
     switch (level) {
     case 1:
+	setup_alley_height();
 	setup_alley_palette();
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
 	init_habanera_music();
 	break;
     case 2:
+	setup_ocean_height();
 	setup_ocean_palette();
 	attr_screen(ocean_attr);
 	draw_screen(ocean_data);
 	break;
     }
+    reset_level_variables();
     setup_sprite_palette();
     print_score_n_lives();
 }
