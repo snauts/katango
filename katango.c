@@ -469,15 +469,15 @@ static const byte cat_pos[] = {
 };
 
 static const byte cat_x[] = {
-    0, 8, 0, 8, 0, 8, 0
+    0, 8, 0, 8, 0, 8, 0, 8, 0
 };
 
 static const byte cat_y[] = {
-    16, 16, 8, 8, 0, 0
+    16, 16, 8, 8, 0, 0, 248, 248
 };
 
 static const byte cat_s[] = {
-    0, 1, 16, 17, 32, 33,
+    0, 1, 16, 17, 32, 33, 48, 49
 };
 
 static const byte cat_img[] = {
@@ -953,16 +953,43 @@ static void disable_music(byte channel) {
     m->wait = 0;
 }
 
-static void victory_dance(void) {
-    mute_music();
-    cat_sitting();
+static void victory_music(void) {
     init_music(music + 0, victory_bass);
     init_music(music + 1, victory_high);
+}
 
-    for (byte i = 0; i < 200; i++) {
+static void hide_wind(void) {
+    wind_frame = 0;
+    for (byte n = WIND_SPRITES; n != 0; n += 4) {
+	oam[n] = 255;
+    }
+}
+
+static void katango(void) {
+    if (music[0].wait == 0 && wind_frame++ < 5) {
+	byte i = CAT_SPRITES;
+	byte offset = direction ? 1 : 0;
+	for (byte n = 0; n < 8; n++) {
+	    oam[i++] = height - cat_y[n] - 8;
+	    oam[i++] = cat_s[n] + 14;
+	    oam[i++] = direction;
+	    oam[i++] = distance + cat_x[n + offset];
+	}
+	direction ^= BIT(6);
+    }
+}
+
+static void victory_dance(void) {
+    mute_music();
+    victory_music();
+    cat_sitting();
+    hide_wind();
+
+    for (byte i = 0; i < 196; i++) {
 	wait_signal();
 	sound_sfx();
 	play_music();
+	katango();
     }
 }
 
