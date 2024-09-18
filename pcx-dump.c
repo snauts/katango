@@ -535,6 +535,21 @@ static void *habanera_high[] = {
     NULL,
 };
 
+static unsigned vc_bass[] = {
+    P(L2),
+    C(2, Lr4q), E(2, Lr4q), G(3, Lr8q), A(2, Lr8q), C(3, Lr4q),
+    P(L2), END
+};
+
+static unsigned vc_high[] = {
+    P(L2),
+    C(4, Ls4), E(4, Ls4), G(4, Ls8), A(4, Ls8), C(5, Ls4),
+    P(L2), END
+};
+
+static void *victory_bass[] = { vc_bass };
+static void *victory_high[] = { vc_high };
+
 static void print_note(unsigned note) {
     unsigned value;
     if ((note >> 24) == 0) {
@@ -687,6 +702,9 @@ static int save_music(void) {
     print_level("habanera_fish", habanera_fish, alley_height, habanera_high);
     print_sheet("habanera_bass", habanera_bass);
     print_sheet("habanera_high", habanera_high);
+
+    print_sheet("victory_bass", victory_bass);
+    print_sheet("victory_high", victory_high);
     return 0;
 }
 

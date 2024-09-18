@@ -906,9 +906,6 @@ static void play_music(void) {
     play_channel(music + 1, 4);
 }
 
-static void victory_dance(void) {
-}
-
 static void start_game_loop(void) {
     while (lives <= 9) {
 	wait_signal();
@@ -954,6 +951,19 @@ static void disable_music(byte channel) {
     m->sheet = (byte **) empty;
     m->bar = (byte *) stop;
     m->wait = 0;
+}
+
+static void victory_dance(void) {
+    mute_music();
+    cat_sitting();
+    init_music(music + 0, victory_bass);
+    init_music(music + 1, victory_high);
+
+    for (byte i = 0; i < 200; i++) {
+	wait_signal();
+	sound_sfx();
+	play_music();
+    }
 }
 
 static void load_level(void) {
