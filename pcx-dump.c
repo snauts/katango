@@ -615,20 +615,30 @@ static int output_byte(int count, unsigned char data) {
 
 #define BEST_SCORE 8
 
+static int print_pair(int n, unsigned char time, unsigned char index) {
+    printf(" 0x%02x,", time);
+    printf(" 0x%02x,", index);
+    if ((n & 3) == 3) printf("\n");
+    return n + 1;
+}
+
 static void print_fish(char *name, struct Fish *map, int count) {
+    int n = 0;
     int time = 0;
     printf("static const byte %s[] = {\n", name);
     for (int i = 0; i < count; i++) {
 	int offset = map[i].time - time;
-	if (offset > 255 || offset == 0) {
+	if (offset <= 0) {
 	    printf("#error BAD INTERVAL\n");
 	}
-	printf(" 0x%02x,", offset);
-	printf(" 0x%02x,", map[i].type);
-	if ((i & 3) == 3) printf("\n");
+	while (offset > 255) {
+	    n = print_pair(n, 255, 0xc0);
+	    offset -= 255;
+	    time += 255;
+	}
+	n = print_pair(n, offset, map[i].type);
 	time += offset;
     }
-    if ((count & 3) != 0) printf("\n");
     printf(" 0x00, 0xff\n");
     printf("};\n");
 }
