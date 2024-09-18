@@ -447,14 +447,22 @@ static const byte alley_palette[] = {
     0x0f, 0x07, 0x17, 0x09,
     0x0f, 0x00, 0x10, 0x20,
     0x0f, 0x06, 0x16, 0x26,
+};
 
+static const byte sprite_palette[] = {
     0x0f, 0x0f, 0x0c, 0x38,
     0x0f, 0x12, 0x1c, 0x21,
     0x0f, 0x12, 0x13, 0x24,
+    0x0f, 0x19, 0x15, 0x05,
 };
+
+static void setup_sprite_palette(void) {
+    setup_palette(sprite_palette, 0x10, sizeof(sprite_palette));
+}
 
 static void setup_alley_palette(void) {
     setup_palette(alley_palette, 0, sizeof(alley_palette));
+    setup_sprite_palette();
 }
 
 static const byte cat_pos[] = {
