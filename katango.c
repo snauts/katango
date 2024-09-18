@@ -965,6 +965,13 @@ static void hide_wind(void) {
     }
 }
 
+static void add_rose_sprite(byte i) {
+    oam[i++] = height - 25;
+    oam[i++] = 44;
+    oam[i++] = direction | 3;
+    oam[i++] = distance + (direction ? 251 : 13);
+}
+
 static void katango(void) {
     if (music[0].wait == 0 && wind_frame++ < 5) {
 	byte i = CAT_SPRITES;
@@ -975,6 +982,7 @@ static void katango(void) {
 	    oam[i++] = direction;
 	    oam[i++] = distance + cat_x[n + offset];
 	}
+	add_rose_sprite(i);
 	direction ^= BIT(6);
     }
 }
