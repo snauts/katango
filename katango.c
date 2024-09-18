@@ -835,7 +835,8 @@ static void game_over(void) {
 
 static void fish_fall(void) {
     if (fish_tick == 0 && *fish_ptr < 0xff) {
-	emit_fish(*fish_ptr++);
+	byte index = *fish_ptr++;
+	if (index < 7) emit_fish(index);
 	fish_tick = *fish_ptr++;
     }
     fish_tick--;
