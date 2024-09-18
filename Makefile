@@ -12,6 +12,7 @@ build:
 	./pcx-dump.bin -t fonts.pcx
 	./pcx-dump.bin -t title.pcx
 	./pcx-dump.bin -t alley.pcx
+	./pcx-dump.bin -t ocean.pcx
 	./pcx-dump.bin -p tiles.chr
 	./pcx-dump.bin -s sprites.pcx
 	./pcx-dump.bin -m ? > music.hdr

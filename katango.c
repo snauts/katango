@@ -62,6 +62,7 @@ void rst(void) __naked {
 
 #include "title.hdr"
 #include "alley.hdr"
+#include "ocean.hdr"
 #include "music.hdr"
 
 #define BIT(n)		(((byte) 1) << (n))
@@ -448,6 +449,13 @@ static const byte alley_palette[] = {
     0x0f, 0x06, 0x16, 0x26,
 };
 
+static const byte ocean_palette[] = {
+    0x0f, 0x15, 0x25, 0x35,
+    0x0f, 0x08, 0x18, 0x02,
+    0x0f, 0x02, 0x28, 0x0c,
+    0x0f, 0x03, 0x38, 0x3d,
+};
+
 static const byte sprite_palette[] = {
     0x0f, 0x0f, 0x0c, 0x38,
     0x0f, 0x12, 0x1c, 0x21,
@@ -461,7 +469,10 @@ static void setup_sprite_palette(void) {
 
 static void setup_alley_palette(void) {
     setup_palette(alley_palette, 0, sizeof(alley_palette));
-    setup_sprite_palette();
+}
+
+static void setup_ocean_palette(void) {
+    setup_palette(ocean_palette, 0, sizeof(ocean_palette));
 }
 
 static const byte cat_pos[] = {
@@ -1011,7 +1022,13 @@ static void load_level(void) {
 	draw_screen(alley_data);
 	init_habanera_music();
 	break;
+    case 2:
+	setup_ocean_palette();
+	attr_screen(ocean_attr);
+	draw_screen(ocean_data);
+	break;
     }
+    setup_sprite_palette();
     print_score_n_lives();
 }
 
