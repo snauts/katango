@@ -211,6 +211,7 @@ static void update_cat(void);
 static void reset_level(void) {
     position = 3;
     direction = 0;
+    lives &= ~0x80;
 
     fish_dir = 0;
     fish_free = 0;
@@ -227,8 +228,6 @@ static void reset_game_state(void) {
     level = 1;
 
     memset(height_map, 208, 7);
-
-    reset_level();
 }
 
 static void ppu_ctrl(void) {
@@ -907,6 +906,9 @@ static void play_music(void) {
     play_channel(music + 1, 4);
 }
 
+static void victory_dance(void) {
+}
+
 static void start_game_loop(void) {
     while (lives <= 9) {
 	wait_signal();
@@ -919,7 +921,6 @@ static void start_game_loop(void) {
 	fish_fall();
 	update_score();
     }
-    game_over();
 }
 
 static void print_score_n_lives(void) {
@@ -944,6 +945,38 @@ static void init_habanera_music(void) {
     fish_tick = *habanera_fish;
 }
 
+static void load_level(void) {
+    wipe_screen();
+    reset_level();
+    switch (level) {
+    case 1:
+	setup_alley_palette();
+	attr_screen(alley_attr);
+	draw_screen(alley_data);
+	init_habanera_music();
+	break;
+    }
+    print_score_n_lives();
+}
+
+static void game_level_loop(void) {
+    for (;;) {
+	load_level();
+	start_game_loop();
+	if (lives == 0xff) {
+	    game_over();
+	    break;
+	}
+	else {
+	    victory_dance();
+	    if (level++ == 1) {
+		game_done();
+		break;
+	    }
+	}
+    }
+}
+
 void game_startup(void) {
     hw_init();
 
@@ -955,14 +988,7 @@ void game_startup(void) {
 	wait_start_button();
 
 	reset_game_state();
-
-	wipe_screen();
-	setup_alley_palette();
-	attr_screen(alley_attr);
-	draw_screen(alley_data);
-	print_score_n_lives();
-	init_habanera_music();
-	start_game_loop();
+	game_level_loop();
     }
 }
 
