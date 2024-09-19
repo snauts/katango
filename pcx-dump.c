@@ -361,6 +361,7 @@ static unsigned mb_silent[] = {
 };
 
 #include "habanera.h"
+#include "lunnaja.h"
 
 static unsigned vc_bass[] = {
     P(L2),
@@ -512,6 +513,10 @@ static int save_music(void) {
     print_level("habanera_fish", habanera_fish, alley_height, habanera_high);
     print_sheet("habanera_bass", habanera_bass);
     print_sheet("habanera_high", habanera_high);
+
+    print_level("lunnaja_fish", lunnaja_fish, ocean_height, lunnaja_vln1);
+    print_sheet("lunnaja_vln1", lunnaja_vln1);
+    print_sheet("lunnaja_vln2", lunnaja_vln2);
 
     print_sheet("victory_bass", victory_bass);
     print_sheet("victory_high", victory_high);

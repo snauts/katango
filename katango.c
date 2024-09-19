@@ -961,6 +961,13 @@ static void init_habanera_music(void) {
     fish_tick = *habanera_fish;
 }
 
+static void init_lunnaja_music(void) {
+    init_music(music + 0, lunnaja_vln1);
+    init_music(music + 1, lunnaja_vln2);
+    fish_ptr = lunnaja_fish + 1;
+    fish_tick = *lunnaja_fish;
+}
+
 static void disable_music(byte channel) {
     static const byte * const empty[] = { NULL };
     static const byte stop[] = { 0xff };
@@ -1035,6 +1042,7 @@ static void load_level(void) {
 	setup_ocean_palette();
 	attr_screen(ocean_attr);
 	draw_screen(ocean_data);
+	init_lunnaja_music();
 	break;
     }
     reset_level_variables();
