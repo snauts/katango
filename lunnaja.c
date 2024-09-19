@@ -46,9 +46,20 @@ static unsigned ln_vln1_3[] = {
     E(5, Lr1), END
 };
 
+static unsigned ln_vln1_4[] = {
+    D(5, Lr8), E(5, Lr8), F(5, Lr8), G(5, Lr8),
+    A(5, Lr8), Gs(5, Lr8), A(5, Lr8p), F(5, Lr16),
+    END
+};
+
+static unsigned ln_vln1_5[] = {
+    E(5, Lr8), C(5, Lr8), C(5, Lr2p), END
+};
+
 static void *lunnaja_vln1[] = {
     ln_vln1_0, ln_vln1_1,
-    ln_vln1_2, ln_vln1_3, ln_silent, ln_silent,
+    ln_vln1_2, ln_vln1_3, ln_vln1_4, ln_vln1_5,
+    ln_silent, ln_silent, ln_silent, ln_silent,
     NULL,
 };
 
@@ -68,9 +79,14 @@ static unsigned ln_vln2_3[] = {
     C(4, Lr4p), B(3, Lr8), A(3, Lr4), C(4, Lr4), END
 };
 
+static unsigned ln_vln2_4[] = {
+    C(4, Lr4), A(3, Lr2), B(3, Lr8), C(4, Lr8), END
+};
+
 static void *lunnaja_vln2[] = {
     ln_vln2_0, ln_vln2_1,
-    ln_vln2_2, ln_vln2_3, ln_silent, ln_silent,
+    ln_vln2_2, ln_vln2_3, ln_vln2_2, ln_vln2_4,
+    ln_silent, ln_silent, ln_silent, ln_silent,
     NULL,
 };
 
