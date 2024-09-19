@@ -9,7 +9,7 @@
 #define L16		9
 
 /* slurs */
-#define Lr1		FADE(5, L2)
+#define Lr1		FADE(5, L1)
 #define Lr2		FADE(5, L2)
 #define Lr2p		FADE(5, L2 + L4)
 #define Lr4		FADE(5, L4)
