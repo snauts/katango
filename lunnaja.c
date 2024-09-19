@@ -8,6 +8,8 @@
 #define L8t		L4 / 3
 #define L16		9
 
+#define Lx8		FADE(1, L8)
+
 #define Ls4		FADE(4, L4)
 #define Ls8		FADE(4, L8)
 
@@ -109,8 +111,20 @@ static unsigned ln_vln1_H[] = {
     A(4, Lr2), P(L2), END
 };
 
+static unsigned ln_vln1_X[] = {
+    E(4, Lx8), A(4, Lx8), Gs(4, Lx8), A(4, Lx8),
+    C(5, Lx8), B(4, Lx8), A(4, Lx8), C(5, Lx8),
+    END
+};
+
+static unsigned ln_vln1_Y[] = {
+    E(5, Lx8), D(5, Lx8), C(5, Lx8), B(4, Lx8),
+    A(4, Lr2),
+    END
+};
+
 static void *lunnaja_vln1[] = {
-    ln_vln1_0, ln_vln1_1,
+    ln_vln1_X, ln_vln1_Y, ln_vln1_0, ln_vln1_1,
     ln_vln1_2, ln_vln1_3, ln_vln1_4, ln_vln1_5,
     ln_vln1_6, ln_vln1_7, ln_vln1_8, ln_vln1_9,
     ln_vln1_A, ln_vln1_B, ln_vln1_C, ln_vln1_D,
@@ -233,8 +247,16 @@ static unsigned ln_vln2_M[] = {
     C(4, Ls8), P(L8), A(3, Lr4), P(L2), END
 };
 
+static unsigned ln_vln2_X[] = {
+    A(3, Ls8), P(L4), P(L8), A(3, Ls8), P(L4), P(L8), END
+};
+
+static unsigned ln_vln2_Y[] = {
+    D(4, Ls8), P(L8), Gs(3, Ls8), P(L8), P(L4), A(3, Lr4), END
+};
+
 static void *lunnaja_vln2[] = {
-    ln_vln2_0, ln_vln2_1,
+    ln_vln2_X, ln_vln2_Y, ln_vln2_0, ln_vln2_1,
     ln_vln2_2, ln_vln2_3, ln_vln2_2, ln_vln2_4,
     ln_vln2_5, ln_vln2_6, ln_vln2_7, ln_vln2_8,
     ln_vln2_9, ln_vln2_A, ln_vln2_B, ln_vln2_C,
@@ -245,7 +267,7 @@ static void *lunnaja_vln2[] = {
 };
 
 static char *lunnaja_fish[] = {
-    "_______", "_______",
+    "_______", "_______", "_______", "_______",
     "_______", "_______", "_______", "_______",
     "_______", "_______", "_______", "_______",
     "_______", "_______", "_______", "_______",
