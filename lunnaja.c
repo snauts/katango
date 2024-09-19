@@ -1,12 +1,12 @@
 #include "notes.h"
 
-#define L1		96
-#define L2		48
-#define L4		24
+#define L1		144
+#define L2		72
+#define L4		36
 #define L4t		L2 / 3
-#define L8		12
+#define L8		18
 #define L8t		L4 / 3
-#define L16		6
+#define L16		9
 
 /* staccato */
 #define Ls2p		FADE(1, L2 + L4)
