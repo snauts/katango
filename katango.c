@@ -888,8 +888,12 @@ static const byte staccato[] = {
     0x3f, 0x3e, 0x3d, 0x3c, 0x39, 0x35, 0x32, 0xff
 };
 
+static const byte trailing[] = {
+    0x3f, 0x3e, 0x3c, 0x3a, 0x39, 0x37, 0x34, 0xff
+};
+
 static const byte * const envelopes[] = {
-    silent, staccato, slur, quiet_staccato, quiet_slur,
+    silent, staccato, slur, quiet_staccato, quiet_slur, trailing
 };
 
 static void play_channel(struct Music *m, byte offset) {
