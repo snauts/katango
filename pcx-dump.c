@@ -301,24 +301,22 @@ static float frequencies[] = {
     30.87, 61.74, 123.47, 246.94, 493.88, 987.77, 1975.53, 3951.00, 7902.13,
 };
 
-static unsigned get_note(int note, int octave, int length) {
+static unsigned get_note(unsigned data) {
+    int index = 9 * PITCH(data) + OCTAVE(data);
     const float cpu = 1789773.0 / 16; /* 1662607.0 for PAL */
-    unsigned period = roundf(cpu / frequencies[9 * note + octave] - 1);
+    unsigned period = roundf(cpu / frequencies[index] - 1);
     period = ((period & 0xff) << 8) | ((period >> 8) & 0x7);
 
-    unsigned fade = (length >> 8) & 0xff;
-    if (!fade) printf("#error BAD ENVELOPE\n");
-
-    return (fade << 24) | (period << 8) | (length & 0xff);
+    return (ENVELOPE(data) << 24) | (period << 8) | LENGTH(data);
 }
 
 static void print_note(unsigned note) {
     unsigned value;
-    if ((note >> 24) == 0) {
-	value = note & 0xff; /* save pause */
+    if (!IS_NOTE(note)) {
+	value = LENGTH(note); /* save pause */
     }
     else {
-	value = get_note((note >> 16) & 0xff, note >> 24, note & 0xffff);
+	value = get_note(note);
     }
     for (int i = 24; i >= 0; i -= 8) {
 	printf(" 0x%02x,", (value >> i) & 0xff);
@@ -403,6 +401,17 @@ static void print_fish(char *name, struct Fish *map, int count) {
     printf("};\n");
 }
 
+void mod_notes(void **sheet, unsigned (*fn)(unsigned)) {
+    while (*sheet != NULL) {
+	unsigned *bar = *sheet;
+	while (*bar != END && !HAS_MARK(*bar)) {
+	    *bar = MARK(fn(*bar));
+	    bar++;
+	}
+	sheet++;
+    }
+}
+
 static int build_fish(void *ptr, char **level, int *height, void **sheet) {
     int time = 0;
     int count = 0;
@@ -412,7 +421,7 @@ static int build_fish(void *ptr, char **level, int *height, void **sheet) {
 	unsigned *note = *sheet;
 	const char *fish = *level;
 	while (*note != END) {
-	    if (*note >> 24) {
+	    if (IS_NOTE(*note)) {
 		char type = fish[index];
 		if (type >= '0' && type <= '9') {
 		    type = type - '0';
@@ -429,7 +438,7 @@ static int build_fish(void *ptr, char **level, int *height, void **sheet) {
 		    index++;
 		}
 	    }
-	    time += *note & 0xff;
+	    time += LENGTH(*note);
 	    note++;
 	}
 	level++;

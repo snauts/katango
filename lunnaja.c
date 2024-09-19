@@ -8,8 +8,8 @@
 #define L8t		L4 / 3
 #define L16		9
 
-#define Ls4		FADE(1, L4)
-#define Ls8		FADE(1, L8)
+#define Ls4		FADE(4, L4)
+#define Ls8		FADE(4, L8)
 
 /* slurs */
 #define Lr1		FADE(5, L1)
@@ -255,7 +255,17 @@ static char *lunnaja_fish[] = {
     NULL,
 };
 
+static unsigned vln2_mod(unsigned note) {
+    if (IS_NOTE(note)) {
+	note -= (1 << 24); /* lower octave */
+	note -= (1 << 8); /* change envelopes */
+    }
+    return note;
+}
+
 void save_lunnaja(void) {
+    mod_notes(lunnaja_vln2, &vln2_mod);
+
     print_level("lunnaja_fish", lunnaja_fish, ocean_height, lunnaja_vln1);
     print_sheet("lunnaja_vln1", lunnaja_vln1);
     print_sheet("lunnaja_vln2", lunnaja_vln2);
