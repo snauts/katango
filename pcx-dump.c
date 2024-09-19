@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <math.h>
 
+#include "notes.h"
+
 #define MAX_SIZE 4096
 
 static char *file_name;
@@ -310,74 +312,6 @@ static unsigned get_note(int note, int octave, int length) {
     return (fade << 24) | (period << 8) | (length & 0xff);
 }
 
-#define FADE(f, l)	((l & 0xff) | (f << 8))
-#define NOTE(n, o, l)	((l & 0xffff) | (n << 16) | (o << 24))
-
-#define L1		96
-#define L2		48
-#define L4		24
-#define L4t		L2 / 3
-#define L8		12
-#define L8t		L4 / 3
-
-/* staccato */
-#define Ls4		FADE(1, L4)
-#define Ls4t		FADE(1, L4t)
-#define Ls4p		FADE(1, L4 + L8)
-#define Ls8		FADE(1, L8)
-
-/* slurs */
-#define Lr2		FADE(2, L2)
-#define Lr4		FADE(2, L4)
-#define Lr4t		FADE(2, L4t)
-#define Lr8		FADE(2, L8)
-#define Lr8t		FADE(2, L8t)
-
-/* quiet staccato */
-#define Ls4q		FADE(3, L4)
-
-/* quiet slur */
-#define Lr4q		FADE(4, L4)
-#define Lr8q		FADE(4, L8)
-
-#define END		(0xff << 24)
-#define DONE		0xdeadbeef
-#define P(l)		(l & 0xff)
-#define C(o, l)		NOTE(0x0, o, l)
-#define Cs(o, l)	NOTE(0x1, o, l)
-#define D(o, l)		NOTE(0x2, o, l)
-#define Ds(o, l)	NOTE(0x3, o, l)
-#define E(o, l)		NOTE(0x4, o, l)
-#define F(o, l)		NOTE(0x5, o, l)
-#define Fs(o, l)	NOTE(0x6, o, l)
-#define G(o, l)		NOTE(0x7, o, l)
-#define Gs(o, l)	NOTE(0x8, o, l)
-#define A(o, l)		NOTE(0x9, o, l)
-#define As(o, l)	NOTE(0xa, o, l)
-#define B(o, l)		NOTE(0xb, o, l)
-
-static unsigned mb_silent[] = {
-    P(L1), END
-};
-
-#include "habanera.h"
-#include "lunnaja.h"
-
-static unsigned vc_bass[] = {
-    P(L2),
-    C(2, Lr4q), E(2, Lr4q), G(3, Lr8q), A(2, Lr8q), C(3, Lr4q),
-    P(L2), END
-};
-
-static unsigned vc_high[] = {
-    P(L2),
-    C(4, Ls4), E(4, Ls4), G(4, Ls8), A(4, Ls8), C(5, Ls4),
-    P(L2), END
-};
-
-static void *victory_bass[] = { vc_bass };
-static void *victory_high[] = { vc_high };
-
 static void print_note(unsigned note) {
     unsigned value;
     if ((note >> 24) == 0) {
@@ -412,7 +346,7 @@ static void print_sheet_bars(void **sheet) {
     }
 }
 
-static void print_sheet(const char *name, void **sheet) {
+void print_sheet(const char *name, void **sheet) {
     print_sheet_bars(sheet);
 
     printf("static const byte * const %s[] = {\n", name);
@@ -504,22 +438,14 @@ static int build_fish(void *ptr, char **level, int *height, void **sheet) {
     return count;
 }
 
-static void print_level(char *name, char **level, int *height, void **sheet) {
+void print_level(char *name, char **level, int *height, void **sheet) {
     struct Fish map[MAX_FISH];
     print_fish(name, map, build_fish(map, level, height, sheet));
 }
 
 static int save_music(void) {
-    print_level("habanera_fish", habanera_fish, alley_height, habanera_high);
-    print_sheet("habanera_bass", habanera_bass);
-    print_sheet("habanera_high", habanera_high);
-
-    print_level("lunnaja_fish", lunnaja_fish, ocean_height, lunnaja_vln1);
-    print_sheet("lunnaja_vln1", lunnaja_vln1);
-    print_sheet("lunnaja_vln2", lunnaja_vln2);
-
-    print_sheet("victory_bass", victory_bass);
-    print_sheet("victory_high", victory_high);
+    save_habanera();
+    save_lunnaja();
     return 0;
 }
 

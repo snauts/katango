@@ -1,13 +1,15 @@
 CFLAGS = --nostdinc --nostdlib --no-std-crt0 --no-zp-spill --opt-code-speed
 LFLAGS = -b OAM=0x200 -b BSS=0x300 -b CODE=0x8000 -b VECTOR=0xfffa
 
+TOOL_FILES = pcx-dump.c habanera.c lunnaja.c
+
 all: build
 
 run: build
 	fceux katango.nes
 
 build:
-	gcc pcx-dump.c -lm -o pcx-dump.bin
+	gcc $(TOOL_FILES) -lm -o pcx-dump.bin
 	./pcx-dump.bin -r tiles.chr
 	./pcx-dump.bin -t fonts.pcx
 	./pcx-dump.bin -t title.pcx

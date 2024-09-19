@@ -1,5 +1,37 @@
+#include "notes.h"
+
+#define L1		96
+#define L2		48
+#define L4		24
+#define L4t		L2 / 3
+#define L8		12
+#define L8t		L4 / 3
+
+/* staccato */
+#define Ls4		FADE(1, L4)
+#define Ls4t		FADE(1, L4t)
+#define Ls4p		FADE(1, L4 + L8)
+#define Ls8		FADE(1, L8)
+
+/* slurs */
+#define Lr2		FADE(2, L2)
+#define Lr4		FADE(2, L4)
+#define Lr8		FADE(2, L8)
+#define Lr8t		FADE(2, L8t)
+
+/* quiet staccato */
+#define Ls4q		FADE(3, L4)
+
+/* quiet slur */
+#define Lr4q		FADE(4, L4)
+#define Lr8q		FADE(4, L8)
+
 static int alley_height[] = {
     208, 208, 208, 208, 208, 208, 208
+};
+
+static unsigned hb_silent[] = {
+    P(L1), END
 };
 
 static unsigned hb_bass_0[] = {
@@ -165,7 +197,7 @@ static unsigned hb_high_U[] = {
 };
 
 static void *habanera_high[] = {
-    mb_silent, mb_silent, mb_silent, hb_high_1, hb_high_2,
+    hb_silent, hb_silent, hb_silent, hb_high_1, hb_high_2,
     hb_high_3, hb_high_4, hb_high_5, hb_high_2, hb_high_6,
     hb_high_7, hb_high_8, hb_high_2, hb_high_3, hb_high_4,
     hb_high_5, hb_high_2, hb_high_6, hb_high_7, hb_high_9,
@@ -189,3 +221,27 @@ static char *habanera_fish[] = {
     "32x34xx3", "234____",                                            // TU
     NULL,
 };
+
+static unsigned vc_bass[] = {
+    P(L2),
+    C(2, Lr4q), E(2, Lr4q), G(3, Lr8q), A(2, Lr8q), C(3, Lr4q),
+    P(L2), END
+};
+
+static unsigned vc_high[] = {
+    P(L2),
+    C(4, Ls4), E(4, Ls4), G(4, Ls8), A(4, Ls8), C(5, Ls4),
+    P(L2), END
+};
+
+static void *victory_bass[] = { vc_bass };
+static void *victory_high[] = { vc_high };
+
+void save_habanera(void) {
+    print_level("habanera_fish", habanera_fish, alley_height, habanera_high);
+    print_sheet("habanera_bass", habanera_bass);
+    print_sheet("habanera_high", habanera_high);
+
+    print_sheet("victory_bass", victory_bass);
+    print_sheet("victory_high", victory_high);
+}
