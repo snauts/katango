@@ -235,7 +235,7 @@ static void setup_alley_height(void) {
 
 static void setup_ocean_height(void) {
     for (byte i = 0; i < 7; i++) {
-	height_map[i] = i & 1 ? 204 : 188;
+	height_map[i] = i & 1 ? 188 : 204;
     }
 }
 

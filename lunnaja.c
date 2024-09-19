@@ -24,7 +24,7 @@
 #define Lr16		FADE(5, L16)
 
 static int ocean_height[] = {
-    188, 204, 188, 204, 188, 204, 188
+    204, 188, 204, 188, 204, 188, 204
 };
 
 static unsigned ln_silent[] = {
