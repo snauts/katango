@@ -147,6 +147,7 @@ static byte fish_left;
 static byte fish_done;
 static byte fish_miss;
 static byte fish_ding;
+static byte fish_img;
 
 static const byte *fish_ptr;
 static byte fish_tick;
@@ -219,6 +220,7 @@ static void reset_level_variables(void) {
     fish_done = 255;
     fish_miss = 16;
     fish_ding = 8;
+    fish_img = 48;
 
     update_cat();
 }
@@ -592,7 +594,7 @@ static void place_cat(void) {
 static void emit_fish(byte pos) {
     if (fish_free < FISH_SPRITES) {
 	oam[fish_free + 0] = 0;
-	oam[fish_free + 1] = 48;
+	oam[fish_free + 1] = fish_img;
 	oam[fish_free + 2] = fish_dir | 1;
 	oam[fish_free + 3] = cat_pos[pos] + 4;
 	fish_dir = fish_dir ^ BIT(6);
@@ -602,7 +604,7 @@ static void emit_fish(byte pos) {
 
 static void animate_fish(byte index) {
     byte sprite = oam[index];
-    sprite = sprite < 55 ? sprite + 1 : 48;
+    sprite = (sprite + 1) & ~0x08;
     oam[index] = sprite;
 }
 
@@ -640,11 +642,12 @@ static void lose_live(void) {
 
 static void animate_drop(byte index) {
     byte sprite = oam[index + 1];
-    if (sprite < 64) {
-	sprite = 64;
+    byte drop_img = fish_img + 16;
+    if (sprite < drop_img) {
+	sprite = drop_img;
 	lose_live();
     }
-    else if (sprite < 67) {
+    else if ((sprite & 3) < 3) {
 	sprite++;
     }
     else {
@@ -687,7 +690,7 @@ static const byte fish_score[] = {
 };
 
 static const byte fish_bonus[] = {
-    0, 71, 71, 71, 70, 70, 69, 69, 68, 69, 69, 70, 70, 71, 71, 71
+    0, 23, 23, 23, 22, 22, 21, 21, 20, 21, 21, 22, 22, 23, 23, 23
 };
 
 static void move_fish(void) {
@@ -696,7 +699,7 @@ static void move_fish(void) {
 	if (oam[i] == 255) {
 	    fish_free = i;
 	}
-	else if (oam[i + 1] >= 68) {
+	else if (oam[i + 1] >= fish_img + 20) {
 	    fish_expire(i);
 	}
 	else {
@@ -707,7 +710,7 @@ static void move_fish(void) {
 		if (animate) animate_drop(i);
 	    }
 	    else if (index == position && range < 16) {
-		catch_fish(i, fish_bonus[range]);
+		catch_fish(i, fish_img + fish_bonus[range]);
 		inc_score(fish_score[range]);
 	    }
 	    else {
@@ -731,17 +734,20 @@ static void update_score(void) {
 }
 
 static void destroy_fish(void) {
+    byte blow = fish_img + 8;
+    byte done = fish_img + 12;
+    byte gain = fish_img + 20;
     byte animate = (counter & 3) == 0;
     for (byte i = 0; i < FISH_SPRITES; i += 4) {
 	if (oam[i] != 255) {
 	    byte sprite = oam[i + 1];
-	    if (sprite < 56) {
-		oam[i + 1] = 56;
+	    if (sprite < blow) {
+		oam[i + 1] = blow;
 	    }
 	    else if (animate) {
 		oam[i + 1]++;
 	    }
-	    if (sprite >= 68 || sprite == 60) {
+	    if (sprite >= gain || sprite == done) {
 		oam[i] = 255;
 	    }
 	}
