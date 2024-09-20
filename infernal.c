@@ -208,7 +208,7 @@ static unsigned if_next_7[] = {
 };
 
 static unsigned if_next_8[] = {
-    F(5, Ls8), P(L4), P(L8), END
+    F(5, FADE(7, L2)), END
 };
 
 static void *infernal_euph[] = {
@@ -407,7 +407,7 @@ static unsigned if_stop_2[] = {
 };
 
 static unsigned if_stop_3[] = {
-    F(4, Ls8), P(L4), P(L8), END
+    F(4, FADE(7, L2)), END
 };
 
 static void *infernal_tuba[] = {
