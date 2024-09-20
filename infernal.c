@@ -19,6 +19,8 @@
 #define Ls16		FADE(2, L16)
 #define LsXX		FADE(2, LXX)
 
+#define Lz2		FADE(6, L2)
+
 static int flame_height[] = {
     208, 208, 208, 208, 208, 208, 208
 };
@@ -189,6 +191,26 @@ static unsigned if_next_3[] = {
     F(4, Ls8), F(4, Ls8), F(4, Ls8), F(4, Ls8), END
 };
 
+static unsigned if_next_4[] = {
+    F(4, Ls4), P(L4), END
+};
+
+static unsigned if_next_5[] = {
+    A(4, Ls4), P(L4), END
+};
+
+static unsigned if_next_6[] = {
+    F(4, Lz2), END
+};
+
+static unsigned if_next_7[] = {
+    F(5, Lz2), END
+};
+
+static unsigned if_next_8[] = {
+    F(5, Ls8), P(L4), P(L8), END
+};
+
 static void *infernal_euph[] = {
     if_euph_0, if_euph_1, if_euph_2, if_euph_3,
     if_euph_0, if_euph_1, if_euph_2, if_euph_4,
@@ -214,10 +236,15 @@ static void *infernal_euph[] = {
     if_euph_P, if_euph_Q, if_euph_R, if_euph_S,
     if_euph_P, if_euph_V, if_euph_X, if_euph_Y,
     if_euph_Z, if_next_0, if_next_1, if_euph_Y,
+
     if_euph_Z, if_next_0, if_next_2, if_next_2,
     if_next_2, if_next_2, if_next_3, if_next_3,
     if_next_3, if_next_3, if_next_3, if_next_3,
     if_next_3, if_next_3, if_euph_L, if_euph_L,
+
+    if_next_4, if_next_5, if_next_4, if_next_5,
+    if_next_6, if_next_6, if_next_7, if_next_7,
+    if_next_8,
     NULL,
 };
 
@@ -367,6 +394,22 @@ static unsigned if_tuba_Z[] = {
     A(4, Ls4), G(4, Ls4), END
 };
 
+static unsigned if_stop_0[] = {
+    F(4, Ls4), P(L4), END
+};
+
+static unsigned if_stop_1[] = {
+    A(4, Ls4), P(L4), END
+};
+
+static unsigned if_stop_2[] = {
+    F(4, Lz2), END
+};
+
+static unsigned if_stop_3[] = {
+    F(4, Ls8), P(L4), P(L8), END
+};
+
 static void *infernal_tuba[] = {
     if_silent, if_silent, if_tuba_0, if_tuba_1,
     if_silent, if_silent, if_tuba_0, if_tuba_2,
@@ -396,6 +439,10 @@ static void *infernal_tuba[] = {
     if_tuba_V, if_tuba_T, if_tuba_W, if_tuba_X,
     if_tuba_Y, if_tuba_Z, if_tuba_W, if_tuba_X,
     if_tuba_Y, if_tuba_Z, if_tuba_H, if_tuba_H,
+
+    if_stop_0, if_stop_1, if_stop_0, if_stop_1,
+    if_stop_2, if_stop_2, if_stop_2, if_stop_2,
+    if_stop_3,
     NULL,
 };
 

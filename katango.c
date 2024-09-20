@@ -872,6 +872,10 @@ static const byte silent[] = {
     0x30, 0xff
 };
 
+static const byte loud[] = {
+    0x3f, 0xff
+};
+
 static const byte slur[] = {
     0x3f, 0x3e, 0x3c, 0x3a, 0x39, 0xff
 };
@@ -893,7 +897,7 @@ static const byte trailing[] = {
 };
 
 static const byte * const envelopes[] = {
-    silent, staccato, slur, quiet_staccato, quiet_slur, trailing
+    silent, staccato, slur, quiet_staccato, quiet_slur, trailing, loud
 };
 
 static void play_channel(struct Music *m, byte offset) {
