@@ -1057,6 +1057,7 @@ static void victory_dance(void) {
 
 static void load_level(void) {
     wipe_screen();
+    setup_sprite_palette();
     switch (level) {
     case 1:
 	setup_alley_height();
@@ -1077,7 +1078,6 @@ static void load_level(void) {
 	break;
     }
     reset_level_variables();
-    setup_sprite_palette();
     print_score_n_lives();
 }
 
