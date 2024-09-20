@@ -1065,6 +1065,7 @@ static void load_level(void) {
 	attr_screen(ocean_attr);
 	draw_screen(ocean_data);
 	init_lunnaja_music();
+	break;
     case 3:
 	init_infernal_music();
 	break;
