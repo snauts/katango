@@ -220,7 +220,6 @@ static void reset_level_variables(void) {
     fish_done = 255;
     fish_miss = 16;
     fish_ding = 8;
-    fish_img = 48;
 
     update_cat();
 }
@@ -468,10 +467,18 @@ static const byte ocean_palette[] = {
 
 static const byte sprite_palette[] = {
     0x0f, 0x0f, 0x1c, 0x38,
-    0x0f, 0x12, 0x1c, 0x21,
-    0x0f, 0x12, 0x13, 0x24,
     0x0f, 0x19, 0x15, 0x05,
+    0x0f, 0x12, 0x13, 0x24,
 };
+
+static const byte fish_palette[] = {
+    0x0f, 0x12, 0x1c, 0x21,
+};
+
+static void setup_collectible(byte sprite_offset, const byte *palette) {
+    setup_palette(palette, 0x1c, 4);
+    fish_img = sprite_offset;
+}
 
 static void setup_sprite_palette(void) {
     setup_palette(sprite_palette, 0x10, sizeof(sprite_palette));
@@ -479,10 +486,12 @@ static void setup_sprite_palette(void) {
 
 static void setup_alley_palette(void) {
     setup_palette(alley_palette, 0, sizeof(alley_palette));
+    setup_collectible(48, fish_palette);
 }
 
 static void setup_ocean_palette(void) {
     setup_palette(ocean_palette, 0, sizeof(ocean_palette));
+    setup_collectible(48, fish_palette);
 }
 
 static const byte cat_pos[] = {
@@ -595,7 +604,7 @@ static void emit_fish(byte pos) {
     if (fish_free < FISH_SPRITES) {
 	oam[fish_free + 0] = 0;
 	oam[fish_free + 1] = fish_img;
-	oam[fish_free + 2] = fish_dir | 1;
+	oam[fish_free + 2] = fish_dir | 3;
 	oam[fish_free + 3] = cat_pos[pos] + 4;
 	fish_dir = fish_dir ^ BIT(6);
 	fish_free = FISH_SPRITES;
@@ -1022,7 +1031,7 @@ static void hide_wind(void) {
 static void add_rose_sprite(byte i) {
     oam[i++] = height - 25;
     oam[i++] = 44;
-    oam[i++] = direction | 3;
+    oam[i++] = direction | 1;
     oam[i++] = distance + (direction ? 251 : 13);
 }
 
@@ -1057,7 +1066,6 @@ static void victory_dance(void) {
 
 static void load_level(void) {
     wipe_screen();
-    setup_sprite_palette();
     switch (level) {
     case 1:
 	setup_alley_height();
@@ -1077,6 +1085,7 @@ static void load_level(void) {
 	init_infernal_music();
 	break;
     }
+    setup_sprite_palette();
     reset_level_variables();
     print_score_n_lives();
 }
