@@ -35,3 +35,4 @@ void print_sheet(const char *name, void **sheet);
 
 void save_habanera(void);
 void save_lunnaja(void);
+void save_infernal(void);

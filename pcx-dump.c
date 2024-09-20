@@ -455,6 +455,7 @@ void print_level(char *name, char **level, int *height, void **sheet) {
 static int save_music(void) {
     save_habanera();
     save_lunnaja();
+    save_infernal();
     return 0;
 }
 

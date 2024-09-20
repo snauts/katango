@@ -972,6 +972,13 @@ static void init_lunnaja_music(void) {
     fish_tick = *lunnaja_fish;
 }
 
+static void init_infernal_music(void) {
+    init_music(music + 0, infernal_euph);
+    init_music(music + 1, infernal_tuba);
+    fish_ptr = infernal_fish + 1;
+    fish_tick = *infernal_fish;
+}
+
 static void disable_music(byte channel) {
     static const byte * const empty[] = { NULL };
     static const byte stop[] = { 0xff };
@@ -1047,6 +1054,8 @@ static void load_level(void) {
 	attr_screen(ocean_attr);
 	draw_screen(ocean_data);
 	init_lunnaja_music();
+    case 3:
+	init_infernal_music();
 	break;
     }
     reset_level_variables();
