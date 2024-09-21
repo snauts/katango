@@ -231,19 +231,13 @@ static void reset_game_state(void) {
     level = 1;
 }
 
-static void setup_alley_height(void) {
-    memset(height_map, 208, 7);
+static void setup_const_height(byte h) {
+    memset(height_map, h, 7);
 }
 
 static void setup_ocean_height(void) {
     for (byte i = 0; i < 7; i++) {
 	height_map[i] = i & 1 ? 188 : 204;
-    }
-}
-
-static void setup_flame_height(void) {
-    for (byte i = 0; i < 7; i++) {
-	height_map[i] = 208 - (i << 2);
     }
 }
 
@@ -473,10 +467,10 @@ static const byte ocean_palette[] = {
 };
 
 static const byte flame_palette[] = {
-    0x0f, 0x0f, 0x0f, 0x0f,
-    0x0f, 0x0f, 0x0f, 0x0f,
-    0x0f, 0x06, 0x15, 0x27,
-    0x0f, 0x06, 0x15, 0x00,
+    0x0f, 0x16, 0x26, 0x36,
+    0x0f, 0x16, 0x26, 0x00,
+    0x0f, 0x16, 0x26, 0x27,
+    0x0f, 0x16, 0x26, 0x00,
 };
 
 static const byte sprite_palette[] = {
@@ -1087,7 +1081,7 @@ static void load_level(void) {
     wipe_screen();
     switch (level) {
     case 1:
-	setup_alley_height();
+	setup_const_height(208);
 	setup_alley_palette();
 	attr_screen(alley_attr);
 	draw_screen(alley_data);
@@ -1101,7 +1095,7 @@ static void load_level(void) {
 	init_lunnaja_music();
 	break;
     case 3:
-	setup_flame_height();
+	setup_const_height(192);
 	setup_flame_palette();
 	attr_screen(flame_attr);
 	draw_screen(flame_data);
