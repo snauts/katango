@@ -63,6 +63,7 @@ void rst(void) __naked {
 #include "title.hdr"
 #include "alley.hdr"
 #include "ocean.hdr"
+#include "flame.hdr"
 #include "music.hdr"
 
 #define BIT(n)		(((byte) 1) << (n))
@@ -237,6 +238,12 @@ static void setup_alley_height(void) {
 static void setup_ocean_height(void) {
     for (byte i = 0; i < 7; i++) {
 	height_map[i] = i & 1 ? 188 : 204;
+    }
+}
+
+static void setup_flame_height(void) {
+    for (byte i = 0; i < 7; i++) {
+	height_map[i] = 208 - (i << 2);
     }
 }
 
@@ -465,6 +472,13 @@ static const byte ocean_palette[] = {
     0x0f, 0x03, 0x38, 0x3d,
 };
 
+static const byte flame_palette[] = {
+    0x0f, 0x0f, 0x0f, 0x0f,
+    0x0f, 0x0f, 0x0f, 0x0f,
+    0x0f, 0x06, 0x15, 0x27,
+    0x0f, 0x06, 0x15, 0x00,
+};
+
 static const byte sprite_palette[] = {
     0x0f, 0x0f, 0x1c, 0x38,
     0x0f, 0x19, 0x15, 0x05,
@@ -491,6 +505,11 @@ static void setup_alley_palette(void) {
 
 static void setup_ocean_palette(void) {
     setup_palette(ocean_palette, 0, sizeof(ocean_palette));
+    setup_collectible(48, fish_palette);
+}
+
+static void setup_flame_palette(void) {
+    setup_palette(flame_palette, 0, sizeof(flame_palette));
     setup_collectible(48, fish_palette);
 }
 
@@ -1082,6 +1101,10 @@ static void load_level(void) {
 	init_lunnaja_music();
 	break;
     case 3:
+	setup_flame_height();
+	setup_flame_palette();
+	attr_screen(flame_attr);
+	draw_screen(flame_data);
 	init_infernal_music();
 	break;
     }
