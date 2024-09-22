@@ -1095,7 +1095,7 @@ static void load_level(void) {
 	init_lunnaja_music();
 	break;
     case 3:
-	setup_const_height(192);
+	setup_const_height(184);
 	setup_flame_palette();
 	attr_screen(flame_attr);
 	draw_screen(flame_data);
