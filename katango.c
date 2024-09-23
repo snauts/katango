@@ -1165,7 +1165,7 @@ void game_startup(void) {
 	wipe_screen();
 	attr_screen(title_attr);
 	draw_screen(title_data);
-	show_highscore_table();
+	// show_highscore_table();
 	animate_title_text();
 	wait_start_button();
 
