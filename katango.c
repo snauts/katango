@@ -844,6 +844,13 @@ static void set_attributes(byte offset, byte data, byte amount) {
     ppu_update(amount);
 }
 
+static void show_final_score(void) {
+    print_msg("SCORE:", 10, 24);
+    score_to_buffer(0);
+    ppu_addr = 0x2330;
+    ppu_update(sizeof(score));
+}
+
 static void game_done(void) {
     wipe_screen();
 
@@ -863,10 +870,7 @@ static void game_done(void) {
     msg_with_delay("MASTER OF", 17, 12);
     animate_title_text();
 
-    print_msg("SCORE:", 10, 24);
-    score_to_buffer(0);
-    ppu_addr = 0x2330;
-    ppu_update(5);
+    show_final_score();
     wait_start_button();
 }
 
@@ -886,12 +890,9 @@ static void game_over(void) {
     static const byte game_over_palette[] = { 0x0f, 0x16, 0x26, 0x36 };
     setup_palette(game_over_palette, 0, sizeof(game_over_palette));
 
-    print_msg("GAME OVER", 12, 12);
+    print_msg("GAME OVER", 11, 12);
 
-    score_to_buffer(0);
-    ppu_addr = 0x21ee;
-    ppu_update(5);
-
+    show_final_score();
     wait_start_button();
 }
 
