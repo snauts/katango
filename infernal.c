@@ -22,7 +22,7 @@
 #define Lz2		FADE(6, L2)
 
 static int flame_height[] = {
-    208, 208, 208, 208, 208, 208, 208
+    184, 184, 184, 184, 184, 184, 184
 };
 
 static unsigned if_silent[] = {
