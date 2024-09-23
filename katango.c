@@ -1125,7 +1125,7 @@ static void game_level_loop(void) {
 	}
 	else {
 	    victory_dance();
-	    if (level++ == 2) {
+	    if (level++ == 3) {
 		game_done();
 		break;
 	    }
