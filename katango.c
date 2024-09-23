@@ -154,6 +154,7 @@ static byte fish_img;
 
 static const byte *fish_ptr;
 static byte fish_tick;
+static byte table[24];
 
 struct Music {
     byte wait;
@@ -204,12 +205,23 @@ static void clear_palette(void) {
     }
 }
 
+static const byte default_table[] = {
+    'O', 'F', 'B', '0', '0', '3', '0', '0',
+    'F', 'M', 'N', '0', '0', '2', '0', '0',
+    'B', 'Z', 'T', '0', '0', '1', '0', '0',
+};
+
+static byte char_to_tile(char c);
 static void init_memory(void) {
     buttons = 0;
     counter = 0;
     ppu_count = 0;
 
     memset(oam, 255, 0x100);
+
+    for (byte i = 0; i < sizeof(table); i++) {
+	table[i] = char_to_tile(default_table[i]);
+    }
 }
 
 static void update_cat(void);
@@ -1134,6 +1146,17 @@ static void game_level_loop(void) {
     }
 }
 
+static void show_highscore_table(void) {
+    byte i = 0;
+    for (int y = 0; y < 3; y++) {
+	for (int x = 0; x < 9; x++) {
+	    ppu_addr = 0x22ab + (y << 5);
+	    ppu_buffer[x] = x == 3 ? 0 : table[i++];
+	    ppu_update(9);
+	}
+    }
+}
+
 void game_startup(void) {
     hw_init();
 
@@ -1141,6 +1164,7 @@ void game_startup(void) {
 	wipe_screen();
 	attr_screen(title_attr);
 	draw_screen(title_data);
+	show_highscore_table();
 	animate_title_text();
 	wait_start_button();
 
