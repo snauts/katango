@@ -113,6 +113,8 @@ void rst(void) __naked {
 #define WIND_SPRITES	244
 #define CAT_SPRITES	220
 
+#define SPR_OFFSET(x)	(x)
+
 #define STATS_STRING	"SCORE:      DROPS:"
 #define STATS_SCORE	6
 #define STATS_LIVES	18
@@ -483,9 +485,9 @@ static const byte fish_palette[] = {
     0x0f, 0x12, 0x1c, 0x21,
 };
 
-static void setup_collectible(byte sprite_offset, const byte *palette) {
+static void setup_collectible(byte item_offset, const byte *palette) {
     setup_palette(palette, 0x1c, 4);
-    fish_img = sprite_offset;
+    fish_img = SPR_OFFSET(item_offset);
 }
 
 static void setup_sprite_palette(void) {
@@ -524,7 +526,13 @@ static const byte cat_s[] = {
 };
 
 static const byte cat_img[] = {
-    6, 4, 2, 0, 2, 4, 6,
+    SPR_OFFSET(6),
+    SPR_OFFSET(4),
+    SPR_OFFSET(2),
+    SPR_OFFSET(0),
+    SPR_OFFSET(2),
+    SPR_OFFSET(4),
+    SPR_OFFSET(6),
 };
 
 static void add_wind(byte side) {
@@ -532,7 +540,7 @@ static void add_wind(byte side) {
     byte offset = distance + side;
     for (byte n = 0; n < 6; n += 2) {
 	oam[i++] = height - cat_y[n];
-	oam[i++] = cat_s[n] + 8;
+	oam[i++] = cat_s[n] + SPR_OFFSET(8);
 	oam[i++] = direction;
 	oam[i++] = offset;
     }
@@ -779,7 +787,7 @@ static void destroy_fish(void) {
 static void cat_sitting(void) {
     byte i = CAT_SPRITES;
     for (byte n = 0; n < 6; n++) {
-	oam[i + 1] = cat_s[n];
+	oam[i + 1] = SPR_OFFSET(cat_s[n]);
 	i = i + 4;
     }
 }
@@ -1043,7 +1051,7 @@ static void hide_wind(void) {
 
 static void add_rose_sprite(byte i) {
     oam[i++] = height - 25;
-    oam[i++] = 44;
+    oam[i++] = SPR_OFFSET(44);
     oam[i++] = direction | 1;
     oam[i++] = distance + (direction ? 251 : 13);
 }
@@ -1054,7 +1062,7 @@ static void katango(void) {
 	byte offset = direction ? 1 : 0;
 	for (byte n = 0; n < 8; n++) {
 	    oam[i++] = height - cat_y[n] - 8;
-	    oam[i++] = cat_s[n] + 14;
+	    oam[i++] = cat_s[n] + SPR_OFFSET(14);
 	    oam[i++] = direction;
 	    oam[i++] = distance + cat_x[n + offset];
 	}
