@@ -1148,6 +1148,7 @@ static void game_level_loop(void) {
 
 static void show_highscore_table(void) {
     byte i = 0;
+    set_attributes(0x20, 0xff, 16);
     for (int y = 0; y < 3; y++) {
 	for (int x = 0; x < 9; x++) {
 	    ppu_addr = 0x22ab + (y << 5);
