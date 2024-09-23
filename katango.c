@@ -228,7 +228,7 @@ static void reset_level_variables(void) {
 }
 
 static void reset_game_state(void) {
-    memset(score, 0, 5);
+    memset(score, 0, sizeof(score));
     lives = 9;
     level = 1;
 }
@@ -705,7 +705,7 @@ static void fish_expire(byte i) {
 }
 
 static void inc_score(byte amount) {
-    for (byte i = 4; i != 255; i--) {
+    for (byte i = sizeof(score) - 1; i != 255; i--) {
 	score[i] += amount;
 	if (score[i] >= 10) {
 	    score[i] -= 10;
@@ -752,7 +752,7 @@ static void move_fish(void) {
 }
 
 static void score_to_buffer(byte offset) {
-    for (byte i = 0; i < 5; i++) {
+    for (byte i = 0; i < sizeof(score); i++) {
 	ppu_buffer[offset + i] = digit_to_tile(score[i]);
     }
 }
