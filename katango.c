@@ -494,6 +494,11 @@ static const byte sprite_palette[] = {
     0x0f, 0x12, 0x13, 0x24,
 };
 
+static const byte cat_palette[] = {
+    0x0f, 0x0f, 0x1c, 0x38,
+    0x0f, 0x20, 0x1c, 0x35,
+};
+
 static const byte fish_palette[] = {
     0x0f, 0x12, 0x1c, 0x21,
 };
@@ -524,6 +529,7 @@ static void setup_flame_palette(void) {
 }
 
 static void setup_stars_palette(void) {
+    setup_palette(cat_palette, 16, sizeof(cat_palette));
     setup_palette(stars_palette, 0, sizeof(stars_palette));
 }
 
@@ -1152,6 +1158,16 @@ static void game_level_loop(void) {
 }
 
 static void show_celestial_cats(void) {
+    byte i = 0;
+    for (byte n = 0; n < 16; n++) {
+	byte x = n & 7;
+	byte s = n < 8;
+	byte d = s ? 132 : 108;
+	oam[i++] = 64 - cat_y[x];
+	oam[i++] = cat_s[x] + SPR_OFFSET(14);
+	oam[i++] = s ? BIT(6) : 1;
+	oam[i++] = d + cat_x[x + s];
+    }
 }
 
 static void show_highscore_table(void) {
@@ -1167,12 +1183,13 @@ static void show_highscore_table(void) {
 
 static void show_highscores(void) {
     wipe_screen();
-    setup_stars_palette();
     attr_screen(stars_attr);
     draw_screen(stars_data);
+    setup_stars_palette();
     show_celestial_cats();
     show_highscore_table();
     wait_start_button();
+    wipe_palette();
 }
 
 void game_startup(void) {
