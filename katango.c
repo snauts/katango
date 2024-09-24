@@ -1263,10 +1263,10 @@ static void enter_new_record_name(void) {
 	    if (state & BUTTON_START) {
 		break;
 	    }
-	    else if (state & BUTTON_LEFT) {
+	    else if (state & CAT_LEFT) {
 		caret = caret == 0 ? 6 : caret - 1;
 	    }
-	    else if (state & BUTTON_RIGHT) {
+	    else if (state & CAT_RIGHT) {
 		caret = caret == 6 ? 0 : caret + 1;
 	    }
 	    else if (state & BUTTON_UP) {
