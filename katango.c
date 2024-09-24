@@ -505,6 +505,7 @@ static const byte sprite_palette[] = {
 static const byte cat_palette[] = {
     0x0f, 0x0f, 0x1c, 0x38,
     0x0f, 0x20, 0x1c, 0x35,
+    0x0f, 0x0f, 0x0f, 0x13,
 };
 
 static const byte fish_palette[] = {
@@ -1220,8 +1221,35 @@ static void show_highscore_table(void) {
     }
 }
 
+static void move_caret(byte caret) {
+    oam[128] = 96 + (record << 4) + 8;
+    oam[129] = SPR_OFFSET(45);
+    oam[130] = (counter >> 3) & 2;
+    oam[131] = 72 + (caret << 3);
+}
+
 static void enter_new_record_name(void) {
     if (record <= 2) {
+	byte caret = 0;
+	for (;;) {
+	    wait_signal();
+	    move_caret(caret);
+	    byte state = check_button();
+	    if (state & BUTTON_START) {
+		break;
+	    }
+	    else if (state & BUTTON_LEFT && caret > 0) {
+		caret = caret - 1;
+	    }
+	    else if (state & BUTTON_RIGHT && caret < 6) {
+		caret = caret + 1;
+	    }
+	    else if (state & BUTTON_UP) {
+	    }
+	    else if (state & BUTTON_DOWN) {
+	    }
+	}
+	oam[128] = 255;
     }
 }
 
