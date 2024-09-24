@@ -64,6 +64,7 @@ void rst(void) __naked {
 #include "alley.hdr"
 #include "ocean.hdr"
 #include "flame.hdr"
+#include "stars.hdr"
 #include "music.hdr"
 
 #define BIT(n)		(((byte) 1) << (n))
@@ -154,7 +155,7 @@ static byte fish_img;
 
 static const byte *fish_ptr;
 static byte fish_tick;
-static byte table[24];
+static byte table[36];
 
 struct Music {
     byte wait;
@@ -205,11 +206,7 @@ static void clear_palette(void) {
     }
 }
 
-static const byte default_table[] = {
-    'O', 'F', 'B', '0', '0', '3', '0', '0',
-    'F', 'M', 'N', '0', '0', '2', '0', '0',
-    'B', 'Z', 'T', '0', '0', '1', '0', '0',
-};
+static const char default_table[] = "JACQUES00300BORIS  00200GEORGES00100";
 
 static byte char_to_tile(char c);
 static void init_memory(void) {
@@ -480,6 +477,10 @@ static const byte ocean_palette[] = {
     0x0f, 0x03, 0x38, 0x3d,
 };
 
+static const byte stars_palette[] = {
+    0x03, 0x18, 0x28, 0x38,
+};
+
 static const byte flame_palette[] = {
     0x0f, 0x16, 0x26, 0x36,
     0x0f, 0x16, 0x26, 0x00,
@@ -497,13 +498,14 @@ static const byte fish_palette[] = {
     0x0f, 0x12, 0x1c, 0x21,
 };
 
-static void setup_collectible(byte item_offset, const byte *palette) {
-    setup_palette(palette, 0x1c, 4);
-    fish_img = SPR_OFFSET(item_offset);
-}
-
 static void setup_sprite_palette(void) {
     setup_palette(sprite_palette, 0x10, sizeof(sprite_palette));
+}
+
+static void setup_collectible(byte item_offset, const byte *palette) {
+    setup_sprite_palette();
+    setup_palette(palette, 0x1c, 4);
+    fish_img = SPR_OFFSET(item_offset);
 }
 
 static void setup_alley_palette(void) {
@@ -519,6 +521,10 @@ static void setup_ocean_palette(void) {
 static void setup_flame_palette(void) {
     setup_palette(flame_palette, 0, sizeof(flame_palette));
     setup_collectible(48, fish_palette);
+}
+
+static void setup_stars_palette(void) {
+    setup_palette(stars_palette, 0, sizeof(stars_palette));
 }
 
 static const byte cat_pos[] = {
@@ -1123,7 +1129,6 @@ static void load_level(void) {
 	init_infernal_music();
 	break;
     }
-    setup_sprite_palette();
     reset_level_variables();
     print_score_n_lives();
 }
@@ -1146,16 +1151,28 @@ static void game_level_loop(void) {
     }
 }
 
+static void show_celestial_cats(void) {
+}
+
 static void show_highscore_table(void) {
     byte i = 0;
-    set_attributes(0x20, 0xff, 16);
     for (int y = 0; y < 3; y++) {
-	for (int x = 0; x < 9; x++) {
-	    ppu_addr = 0x22ab + (y << 5);
-	    ppu_buffer[x] = x == 3 ? 0 : table[i++];
-	    ppu_update(9);
+	for (int x = 0; x < 14; x++) {
+	    ppu_addr = 0x2189 + (y << 6);
+	    ppu_buffer[x] = (x == 7 || x == 8) ? 0 : table[i++];
 	}
+	ppu_update(14);
     }
+}
+
+static void show_highscores(void) {
+    wipe_screen();
+    setup_stars_palette();
+    attr_screen(stars_attr);
+    draw_screen(stars_data);
+    show_celestial_cats();
+    show_highscore_table();
+    wait_start_button();
 }
 
 void game_startup(void) {
@@ -1165,12 +1182,12 @@ void game_startup(void) {
 	wipe_screen();
 	attr_screen(title_attr);
 	draw_screen(title_data);
-	// show_highscore_table();
 	animate_title_text();
 	wait_start_button();
 
 	reset_game_state();
 	game_level_loop();
+	show_highscores();
     }
 }
 
