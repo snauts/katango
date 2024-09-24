@@ -479,6 +479,7 @@ static const byte ocean_palette[] = {
 
 static const byte stars_palette[] = {
     0x03, 0x18, 0x28, 0x38,
+    0x0f, 0x03, 0x38, 0x3d,
 };
 
 static const byte flame_palette[] = {
