@@ -156,6 +156,7 @@ static byte fish_img;
 static const byte *fish_ptr;
 static byte fish_tick;
 static byte table[36];
+static byte record;
 
 struct Music {
     byte wait;
@@ -195,6 +196,12 @@ static void memset(void *buf, byte val, word count) {
     byte *ptr = buf;
     while (count-- > 0) {
 	*ptr++ = val;
+    }
+}
+
+static void memcpy(byte *dst, byte *src, word count) {
+    while (count-- > 0) {
+	*dst++ = *src++;
     }
 }
 
@@ -1171,6 +1178,36 @@ static void show_celestial_cats(void) {
     }
 }
 
+static byte compare_score(byte *s1, byte *s2) {
+    for (byte i = 0; i < sizeof(score); i++) {
+	if (s1[i] > s2[i]) return 1;
+	if (s1[i] < s2[i]) return 0;
+    }
+    return 0;
+}
+
+static void convert_score_to_tiles(void) {
+    for (byte i = 0; i < sizeof(score); i++) {
+	score[i] = digit_to_tile(score[i]);
+    }
+}
+
+static const byte score_offset[] = { 0, 12, 24 };
+
+static void update_score_table(void) {
+    record = 255;
+    for (byte i = 2; i != 255; i--) {
+	byte *entry = table + score_offset[i];
+	byte *current = entry + 7;
+	if (compare_score(score, current)) {
+	    if (i < 2) memcpy(entry + 12, entry, 12);
+	    memcpy(current, score, sizeof(score));
+	    memset(entry, 0, 7);
+	    record = i;
+	}
+    }
+}
+
 static void show_highscore_table(void) {
     byte i = 0;
     for (byte y = 0; y < 3; y++) {
@@ -1183,13 +1220,21 @@ static void show_highscore_table(void) {
     }
 }
 
+static void enter_new_record_name(void) {
+    if (record <= 2) {
+    }
+}
+
 static void show_highscores(void) {
     wipe_screen();
     attr_screen(stars_attr);
     draw_screen(stars_data);
     setup_stars_palette();
     show_celestial_cats();
+    convert_score_to_tiles();
+    update_score_table();
     show_highscore_table();
+    enter_new_record_name();
     wait_start_button();
     wipe_palette();
 }
