@@ -1228,27 +1228,57 @@ static void move_caret(byte caret) {
     oam[131] = 72 + (caret << 3);
 }
 
+static void update_char(byte *ptr, byte dir) {
+    *ptr += dir;
+    byte A = char_to_tile('A');
+    byte Z = char_to_tile('Z');
+    if (*ptr == 1) {
+	*ptr = A;
+    }
+    else if (*ptr == 255) {
+	*ptr = Z;
+    }
+    else if (*ptr < A || *ptr > Z) {
+	*ptr = 0;
+    }
+}
+
+static void display_char(byte *name, byte caret) {
+    ppu_addr = 0x2189 + (record << 6) + caret;
+    ppu_buffer[0] = name[caret];
+    ppu_count = 1;
+}
+
 static void enter_new_record_name(void) {
     if (record <= 2) {
 	byte caret = 0;
+	byte *name = table;
+	name += score_offset[record];
+
 	for (;;) {
 	    wait_signal();
 	    move_caret(caret);
 	    byte state = check_button();
+
 	    if (state & BUTTON_START) {
 		break;
 	    }
-	    else if (state & BUTTON_LEFT && caret > 0) {
-		caret = caret - 1;
+	    else if (state & BUTTON_LEFT) {
+		caret = caret == 0 ? 6 : caret - 1;
 	    }
-	    else if (state & BUTTON_RIGHT && caret < 6) {
-		caret = caret + 1;
+	    else if (state & BUTTON_RIGHT) {
+		caret = caret == 6 ? 0 : caret + 1;
 	    }
 	    else if (state & BUTTON_UP) {
+		update_char(name + caret, 1);
 	    }
 	    else if (state & BUTTON_DOWN) {
+		update_char(name + caret, 255);
 	    }
+
+	    display_char(name, caret);
 	}
+
 	oam[128] = 255;
     }
 }
