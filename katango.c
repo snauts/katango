@@ -1172,10 +1172,11 @@ static void show_celestial_cats(void) {
 
 static void show_highscore_table(void) {
     byte i = 0;
-    for (int y = 0; y < 3; y++) {
-	for (int x = 0; x < 14; x++) {
-	    ppu_addr = 0x2189 + (y << 6);
-	    ppu_buffer[x] = (x == 7 || x == 8) ? 0 : table[i++];
+    for (byte y = 0; y < 3; y++) {
+	ppu_addr = 0x2189 + (y << 6);
+	for (byte x = 0; x < 14; x++) {
+	    byte spacing = (7 <= x && x <= 8);
+	    ppu_buffer[x] = spacing ? 0 : table[i++];
 	}
 	ppu_update(14);
     }
