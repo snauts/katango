@@ -1270,10 +1270,10 @@ static void enter_new_record_name(void) {
 		caret = caret == 6 ? 0 : caret + 1;
 	    }
 	    else if (state & BUTTON_UP) {
-		update_char(name + caret, 1);
+		update_char(name + caret, 255);
 	    }
 	    else if (state & BUTTON_DOWN) {
-		update_char(name + caret, 255);
+		update_char(name + caret, 1);
 	    }
 
 	    display_char(name, caret);
