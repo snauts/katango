@@ -735,6 +735,10 @@ static void fish_expire(byte i) {
 	fish_done = 255;
 	oam[i] = 255;
     }
+    if (fish_left == 8 || fish_left == 16) {
+	oam[i + 0] -= 1;
+	oam[i + 1] += 4;
+    }
 }
 
 static void inc_score(byte amount) {
