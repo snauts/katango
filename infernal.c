@@ -1,11 +1,17 @@
 #include "notes.h"
 
-#define L1		80
-#define L2		40
-#define L4		20
-#define L8		10
-#define L16		5
+#if defined(PAL)
+#define LXX		1
+#define L16		4
+#else
 #define LXX		2
+#define L16		5
+#endif
+
+#define L8		(2 * L16)
+#define L4		(2 * L8)
+#define L2		(2 * L4)
+#define L1		(2 * l2)
 
 /* staccato */
 #define Lx4		FADE(1, L4)

@@ -8,8 +8,11 @@ all: build
 run: build
 	fceux katango.nes
 
+pal:
+	TFLAGS=-DPAL make build
+
 build:
-	gcc $(TOOL_FILES) -lm -o pcx-dump.bin
+	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump.bin
 	./pcx-dump.bin -r tiles.chr
 	./pcx-dump.bin -t fonts.pcx
 	./pcx-dump.bin -t title.pcx

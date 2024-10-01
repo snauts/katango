@@ -1,12 +1,18 @@
 #include "notes.h"
 
-#define L1		144
-#define L2		72
-#define L4		36
-#define L4t		L2 / 3
-#define L8		18
-#define L8t		L4 / 3
+#if defined(PAL)
+#define L16		7
+#else
 #define L16		9
+#endif
+
+#define L8		(2 * L16)
+#define L4		(2 * L8)
+#define L2		(2 * L4)
+#define L1		(2 * L2)
+
+#define L4t		L2 / 3
+#define L8t		L4 / 3
 
 #define Lx8		FADE(1, L8)
 
