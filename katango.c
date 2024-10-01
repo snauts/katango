@@ -192,6 +192,15 @@ static void wait_start_button(void) {
     while (!(check_button() & BUTTON_START)) { }
 }
 
+static byte wait_start_timeout(void) {
+    word timeout = 600;
+    while (!(check_button() & BUTTON_START)) {
+	if (timeout-- == 0) return 0;
+	wait_signal();
+    }
+    return 1;
+}
+
 static void memset(void *buf, byte val, word count) {
     byte *ptr = buf;
     while (count-- > 0) {
@@ -1297,7 +1306,7 @@ static void show_highscores(void) {
     update_score_table();
     show_highscore_table();
     enter_new_record_name();
-    wait_start_button();
+    wait_start_timeout();
     wipe_palette();
 }
 
@@ -1306,13 +1315,15 @@ void game_startup(void) {
 
     for (;;) {
 	wipe_screen();
+	reset_game_state();
 	attr_screen(title_attr);
 	draw_screen(title_data);
 	animate_title_text();
-	wait_start_button();
 
-	reset_game_state();
-	game_level_loop();
+	if (wait_start_timeout()) {
+	    game_level_loop();
+	}
+
 	show_highscores();
     }
 }
