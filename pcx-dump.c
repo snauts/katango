@@ -380,9 +380,16 @@ static int print_pair(int n, unsigned char time, unsigned char index) {
     return n + 1;
 }
 
+static int fish_cmp(const void *a, const void *b) {
+    const struct Fish *fa = a;
+    const struct Fish *fb = b;
+    return fa->time > fb->time;
+}
+
 static void print_fish(char *name, struct Fish *map, int count) {
     int n = 0;
     int time = 0;
+    qsort(map, count, sizeof(struct Fish), &fish_cmp);
     printf("static const byte %s[] = {\n", name);
     for (int i = 0; i < count; i++) {
 	int offset = map[i].time - time;
