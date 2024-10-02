@@ -32,5 +32,5 @@ build:
 	cat header.rom katango.prg katango.chr > katango.nes
 
 clean:
-	rm -f pcx-dump
 	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.prg *.nes
+	rm -f pcx-dump
