@@ -12,23 +12,25 @@ pal:
 	TFLAGS=-DPAL make build
 
 build:
-	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump.bin
-	./pcx-dump.bin -r tiles.chr
-	./pcx-dump.bin -t fonts.pcx
-	./pcx-dump.bin -t title.pcx
-	./pcx-dump.bin -t alley.pcx
-	./pcx-dump.bin -t ocean.pcx
-	./pcx-dump.bin -t flame.pcx
-	./pcx-dump.bin -t stars.pcx
-	./pcx-dump.bin -p tiles.chr
-	./pcx-dump.bin -s sprites.pcx
-	./pcx-dump.bin -m ? > music.hdr
+	gcc $(TOOL_FILES) $(TFLAGS) -lm -o pcx-dump
+	./pcx-dump -r tiles.chr
+	./pcx-dump -t fonts.pcx
+	./pcx-dump -t title.pcx
+	./pcx-dump -t alley.pcx
+	./pcx-dump -t ocean.pcx
+	./pcx-dump -t flame.pcx
+	./pcx-dump -t stars.pcx
+	./pcx-dump -p tiles.chr
+	./pcx-dump -s sprites.pcx
+	./pcx-dump -m ? > music.hdr
 	@echo Compile katango.c
 	@sdcc -mmos6502 $(CFLAGS) katango.c -c
 	@echo Link katango.ihx
 	@sdld $(LFLAGS) -m -i katango.ihx katango.rel
-	hex2bin katango.ihx > /dev/null
-	cat header.rom katango.bin tiles.chr sprites.chr > katango.nes
+	hex2bin -e prg katango.ihx > /dev/null
+	cat tiles.chr sprites.chr > katango.chr
+	cat header.rom katango.prg katango.chr > katango.nes
 
 clean:
-	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.bin *.nes
+	rm -f pcx-dump
+	rm -f *.asm *.ihx *.lst *.map *.rel *.sym *.chr *.hdr *.prg *.nes

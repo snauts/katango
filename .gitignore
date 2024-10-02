@@ -1,3 +1,4 @@
+pcx-dump
 *.asm
 *.ihx
 *.lst
@@ -6,5 +7,5 @@
 *.sym
 *.chr
 *.hdr
-*.bin
+*.prg
 *.nes
